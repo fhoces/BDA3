@@ -299,7 +299,7 @@ best            <- apply(1*(s.theta==aux1), 2,mean)
 p               <- sapply(1:8,function(y) sapply(1:8,function(x) mean(1*(s.theta[,x]>s.theta[,y]))))
 ```  
 
-**Table 2: Probability that $j$ (row) has a better program that school $k$ (column)**  
+**Table 3: Probability that $j$ (row) has a better program that school $k$ (column)**  
 
 | School $j$/School $k$|             |             |             |             |             |             |             |             |           
 |  -----------:        | :--------:  | :-------:   | :-------:   | :-----:     | :----:      | :----:      | :----:      | :----:      |        
@@ -343,7 +343,7 @@ best            <-  sapply(1:8,
 best            <- best/sum(best)  
 ```  
 
-**Table 2.1: Probability that each coaching program is the best among the eight schools (with $\tau = \infty$)**
+**Table 4: Probability that each coaching program is the best among the eight schools (with $\tau = \infty$)**
 
 | School                   | Probability of having the best coaching program|  
 |  -----------:            | :-------------:          |  
@@ -375,7 +375,7 @@ p               <- sapply(1:8,function(x)
 p               <- p - .5 * diag(8)
 ```  
 
-**Table 2.1: Probability that $j$ (row) has a better program that school $k$ (column). With $\tau = \infty$**  
+**Table 5: Probability that $j$ (row) has a better program that school $k$ (column). With $\tau = \infty$**  
 
 | School $j$/School $k$|             |             |             |             |             |             |             |             |           
 |  -----------:        | :--------:  | :-------:   | :-------:   | :-----:     | :----:      | :----:      | :----:      | :----:      |        
@@ -698,13 +698,26 @@ plot(s.alpha, s.beta, xlab=expression(alpha), ylab=expression(beta), xlim=c(min(
 * *5.14d* I don't know how to alter it such that it becomes integrable.
  
   * **10.1**       
-  (To do)  
-  
-  
+  * *10.1a*        
+  If $\theta \sim N(\mu, \sigma_{\theta})$ then $R$ draws $y^{(r)}$ from will have a simulation standard error of $\hat{\sigma_{\theta}}/\sqrt{R}$. Hence in order to be within $0.1 \sigma_{\theta}$ we need $R=100$.  
+  * *10.1b*        
+  For the simulation excercise we choose $\mu=0, \sigma_{\theta}=1$. We perform R draws and for each set of simulated numbers, we compute the 2.5% percentile $\{y^{r}\}_{p=0.025}$ and its difference with the theoretical percentile (-1.96), we repeat this excercise 100 times and look at the average of the difference for different values of $R$.  `r y_reps  <- apply( sapply( 1:100, function(x) sapply(10^(1:5), function(x) abs(-1.96 - quantile(rnorm(x, mean=0, sd=1) , c(.025) ) ) ) ), 1, mean)`  
+**Table 6: Standard Error of Simulations**  
+
+| $R$            | $|\{y^{r}\}_{p=0.025} + 1.96|$ |    
+|  -----------:        | :-------------:          |    
+| 10        | `r y_reps[1]`  |    
+| 100       | `r y_reps[2]`  |    
+| 1000      | `r y_reps[3]`  |    
+| 10000     | `r y_reps[4]`  |    
+| 100000    | `r y_reps[5]`  |      
+
+**Note:** both results don't match.  
+
+
   * **10.4a**       
-  (To do)    
-  
-  
+I follow [this proof](http://www.columbia.edu/~ks20/4703-Sigman/4703-07-Notes-ARM.pdf). 
+We want to prove that the conditional distribution of $theta
   * **11.2**       
   (To do) 
   

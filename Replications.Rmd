@@ -1,5 +1,5 @@
 ---
-title: "Tutorial on Bayesian Statistics: Replicating Section of BDA3"
+title: "Tutorial on Bayesian Statistics: Replicating Sections of BDA3"
 author: "Fernando Hoces de la Guardia"
 output:
   html_document: default
