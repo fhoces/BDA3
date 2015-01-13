@@ -1,0 +1,730 @@
+---
+title: "Tutorial on Bayesian Statistics. Homework from BDA3"
+author: "Fernando Hoces de la Guardia"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ TeX: { equationNumbers: {autoNumber: "all"} } });
+</script>
+  
+Note: Some of the solutions presented here are have been reverse engineered from [here.](http://www.stat.columbia.edu/~gelman/book/solutions3.pdf)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(tidy = FALSE)
+library('boot')
+library('dplyr')
+library('nleqslv')
+
+set.seed(142857)  
+n               <-  50
+
+````
+* 1.1 
+
+  * 1a:
+$$
+\begin{align}
+p(y)  &= \frac{1}{2} \left( p(y| \theta = 1) + p(y| \theta = 2) \right) \nonumber\\
+      &= \frac{1}{2} \left( N(y|1,2^{2}) + N(y|2,2^{2}) \right)
+\end{align}
+$$
+
+```{r , echo=TRUE}
+domain          <- seq(-7,10,.02)
+dens            <- 0.5*dnorm(domain,1,2) + 0.5*dnorm(domain,2,2)
+plot (domain, dens, ylim=c(0,1.1*max(dens)),
+type="l", xlab="y", ylab="", xaxs="i",
+yaxs="i", yaxt="n", bty="n", cex=2)
+```
+
+  * 1b:
+$$
+\begin{align}
+p(\theta = 1 | y = 1 ) &= \frac{p(\theta = 1)p(y = 1| \theta = 1)}{\sum_{i=1}^{2}p(\theta = i)p(y = 1| \theta = i)} \nonumber \\
+                      &= \frac{0.5N(1|1,4)}{\sum_{i=1}^{2}0.5N(1|i,4)}
+\end{align}
+$$
+
+```{r }
+p.theta.1       <- function(sigma) {
+  res1          <- (0.5*dnorm(1,1,sigma)) /(sum(0.5*dnorm(1,c(1,2),sigma)))
+  return(res1)
+  }
+```  
+
+Evaluating the last expression in the respective cumulative distribution function we get:`r p.theta.1(2)`. **Note: even though we are adding "discrete" number of probabilities, we are still in the continuous space (but for $y=1$) and should evaluate the probabilities in the density function.**
+
+
+  * 1c:
+```{r, include=FALSE }
+sigma           <- 2^(-2:3)
+```
+
+**Table 1: Posterior probabilty of $\theta = 1$, af a function of $\sigma$**
+
+| $\sigma$            | $p(\theta = 1 | y = 1 )$ |  
+|  -----------:        | :-------------:          |  
+| `r sigma[1]`         | `r p.theta.1(sigma[1])`  |  
+| `r sigma[2]`         | `r p.theta.1(sigma[2])`  |  
+| `r sigma[3]`         | `r p.theta.1(sigma[3])`  |  
+| `r sigma[4]`         | `r p.theta.1(sigma[4])`  |  
+| `r sigma[5]`         | `r p.theta.1(sigma[5])`  |  
+| `r sigma[6]`         | `r p.theta.1(sigma[6])`  |  
+
+
+ * 1.7  *Let's Make a Deal*  
+Calculate the probability of winning for each box after one of the empty boxes has been revealed and is not a winning box. 
+
+Lets define the following events:  
+  * $A:$ The participant chose the right box at the beginning.  
+  * $B:$ The host opens a particular box, among the unchosen ones, such that is 
+  empty.  
+  * $C:$ Among the unchosen boxes the host chooses a empty box.     
+  
+And let's compute the probabilities of each of this events.   
+$$
+\begin{align*}
+Pr(A) &= 1/3\\
+Pr(C) &= 1/2\\
+Pr(B) &= Pr(B|A)Pr(A) + Pr(B|\neg A)Pr(\neg A) = (1/2)*(1/3) + Pr(B|\neg A)*(2/3)\\
+      &= 1/6 + 2/3*(Pr(B|\neg A,C)Pr(C) + Pr(B|\neg A,\neg C)Pr(\neg C)) \\
+      &= 1/6 + 2/3*(1*(1/2) + 0*(1/2)) = 1/2 
+\end{align*}  
+$$
+Using Bayes' theorem we have that the probability of choosing the right box from the beginning, conditional on a unchosen box being revealed as a losing one is:
+
+$$ Pr(A|B) = \frac{Pr(A)Pr(B|A)}{Pr(B)} = \frac{(1/3)*(1/2)}{1/2}=\frac{1}{3}$$
+
+The participant's chances are not equal across remaining boxes! She is worst of staying with her original choice (33% probability of wining instead of 50%!).
+
+
+More generally if there were $n$ boxes in total and $i$ boxes where revealed, we have that the wrong way of updating the probabilities ($1/(n-i)$) and the Bayesian update ($\frac{i+n*(n-1-i)}{n*(n-i)*(n-i-1)}$) differ significantly as $i \rightarrow n$.  For example the following graph plots both probabilities of winning in a contest with `r n` boxes as the host opens $i$ boxes.
+
+```{r , echo=FALSE}
+n               <- 50 
+open.boxes      <- seq(1,n-1,1)
+bayes.updt  = function(n,i) (i+n*(n-1-i))/((n*(n-i)*(n-i-1)))
+wrong.updt  = function(n,i) 1/(n-i)
+bayes.gain      <- (bayes.updt(n,open.boxes)-wrong.updt(n,open.boxes)) / wrong.updt(n,open.boxes)  
+plot(open.boxes,bayes.gain, type="l", ylab="% Gain in prob of winning", col="red", xlab="boxes open", ylim=c(0,1.1), xlim=c(0,n))
+abline(v=49)
+title(main = "A Dynamic Version of ''Let's Make a Deal'' \n  Percentage Gain in probability of winning by thinking 'Bayesian'" )
+```
+
+
+
+Looking at the graph it seems that the advantages of thinking in a Bayesian fashion are certainly parameter-specific. Also notice that the player here chooses a "stubborn" strategy, I suspect that if she changes boxes in a optimal way the improvement in her chances will be slightly less. Maybe that is the reason why we don't think in a Bayesian fashion all the time. 
+
+---  
+
+ * 2.1
+$$
+\begin{align*}
+P(\theta) &= Beta(4,4)  \\
+P( y | \theta) &= Bin(y|n,\theta)  \\
+\Rightarrow P(\theta|y) &= Beta(4+y,4+(n-y))
+\end{align*}
+$$  
+The **wrong** way to answer the question would be:  
+$$
+\begin{align*}
+P(\theta|y<3) &\propto \sum_{i=0}^{2}Beta(4+i,4+(n-i))
+\end{align*}
+$$
+The **right** way to answer the question would be:  
+$$
+\begin{align*}
+P( y<3 | \theta) &= \sum_{i=0}^{2}Bin(i|n,\theta)\\
+\Rightarrow P(\theta|y) &\propto \sum_{i=0}^{2} {n \choose i} Beta(4+i,4+(n-i))\\  
+\end{align*}
+$$
+In this case some part of the proportionality constant *does* matter. 
+
+```{r,echo=TRUE}
+domain <- seq(0,1,.01)
+dens = apply(sapply(0:2,function(x) choose(10,x)*dbeta(domain,4+x,4+10-x)),1,sum)
+plot(domain, dens, type="l")
+```  
+
+  * 2.14   
+
+  * 2.14a Deriving the posterior for a normal likelihood with known variance, unknown mean, and using a normal prior.  [Slide 15 here](http://www.people.fas.harvard.edu/~plam/teaching/methods/conjugacy/conjugacy_print.pdf)
+  
+  
+**Note:** a good reminder of the main conjugacy relationships can be found [here](http://www.johndcook.com/conjugate_prior_diagram.html)
+
+
+ * **5.3 Reproducing results of section 5.5**  
+
+```{r Ex5.3 data, echo=TRUE}
+#Data:
+school.id       <- LETTERS[1:8]
+effect          <- c(28,8 ,-3,7 ,-1,1 ,18,12)
+se.effect       <- c(15,10,16,11,9 ,11,10,18) 
+
+pool.est        <- sum(effect*se.effect^-2)/sum(se.effect^-2)
+pool.var        <- sum(se.effect^-2)^-1
+pool.ci         <- c(-1.96,1.96)*pool.var^.5 + pool.est
+```   
+
+
+The pooled estimated effect and variance are `r round(100*pool.est)/100` and `r round(100*pool.var)/100`, with a 95% CI of [`r round(100*pool.ci[1])/100`, `r round(100*pool.ci[2])/100`].   
+
+
+*Posterior simulation under ther hierarchical model*  
+Using the identity:  
+$$
+\begin{align}
+p(\theta,\mu,\tau|y) = p(\tau|y)p(\mu|\tau,y)p(\theta|\mu,\tau,y) 
+\end{align}
+$$
+And the results from BDA in equation 5.17, 5.20 and 5.21 we code the joint posterior:
+
+```{r ex5.3 pdfs, echo=TRUE}
+# Eqn 5.17 of BDA3
+post.theta.j    <- function(mu,tau,j) (effect[j]/(se.effect[j]^2) + mu/(tau^2)) / (1/(se.effect[j]^2) + 1/(tau^2)) 
+post.v.theta.j  <- function(tau,j) 1 / (1/(se.effect[j]^2) + 1/(tau^2)) 
+# Eqn 5.20 of BDA3
+post.mu.hat     <- function(tau) sum(effect*1/(se.effect^2 +tau^2))/sum(1/(se.effect^2 +tau^2))
+post.v.mu       <- function(tau) (sum(1/(se.effect^2 +tau^2)))^-1
+
+# Eqn 5.21 of BDA3
+marginal.tau    <- function(tau) {
+  hyper.prior(tau) * (post.v.mu(tau)^.5) * prod(((se.effect^2 + tau^2)^(-1/2)) * 
+                  exp(-((effect - post.mu.hat(tau))^2) / (2 * (se.effect^2 + tau^2))))
+}
+
+#testing alternative
+marginal.tau1   <- function(tau) {
+    marg.post   <- 1
+		for (i in 1:length(effect)) {
+	  marg.post   <- ((se.effect[i]^2 + tau^2)^(-1/2)) * 
+                 exp(-((effect[i] - post.mu.hat(tau))^2) / (2 * (se.effect[i]^2 + tau^2))) *
+                 marg.post    
+		return(hyper.prior(tau) * (post.v.mu(tau)^.5) * marg.post)
+    }
+} 
+
+```  
+
+Define a hyper-prior and draw 1000 samples from each distribution (for all 8 schools).
+
+```{r ex 5.3 sims,echo=TRUE}
+set.seed(142857)
+samps           <- 1000 
+
+hyper.prior     <-  function(tau) 1
+tau.grid        <-  seq(0.001,40, length=samps)
+pdf.tau         <-  sapply(tau.grid,function(x) marginal.tau(x))
+pdf.tau         <-  pdf.tau/sum(pdf.tau)
+
+s.tau           <- sample(tau.grid,samps,prob=pdf.tau, replace=TRUE)
+s.mu            <- sapply(s.tau,function(x) rnorm(1,post.mu.hat(x),(post.v.mu(x))^0.5))
+s.theta         <- NULL 
+for (j in 1:length(school.id)) {
+  s.theta[[j]]         <- sapply(1:samps, 
+                            function(x) 
+                            rnorm(1,
+                                  post.theta.j(s.mu[x],s.tau[x],j),
+                                  (post.v.theta.j(s.tau[x],j))^0.5
+                                  ) )
+  }
+par(mfrow=c(1,1))  
+par(mar = rep(2, 4))
+plot(tau.grid,pdf.tau, type="l", main="Figure 5.5 from BDA3", xlab=expression(tau), ylab="Density")
+
+```   
+
+The sampling method in BDA3 suggest to apply the inverse method from the posterior of $\tau$. I don't do this for two reasons: (i) I'm not sure the posterior has a closed for solution for its inverse, and (ii) given that I already have the density, I can directly draw from that distribution sampling using the `sample` command (which leads me to think that this command applies the inverse method, but **need to check with Susan**). 
+
+````{r ex5.3 tests, echo=TRUE}
+s.theta         <- matrix(unlist(s.theta), ncol = 8, byrow = FALSE)
+s.theta.sort    <- apply(s.theta, 2, sort)
+p               <- t( apply(s.theta.sort, 2, function(x) quantile(x,c(.025,.25,.5, .75, .975),type=1)) )
+p               <- round(p,3) 
+```  
+
+**Table 5.3 from BDA3: **  
+
+| School                   |             |             |             |             |             |           
+|  -----------:            | :--------:  | :-------:   | :-------:   | :-----:     | :----:      |        
+|                          | 2.5%        | 25%         | median      | 75%         | 97.5%       |            
+| `r school.id[1]`         | `r p[1,1]`  | `r p[1,2]`  | `r p[1,3]`  | `r p[1,4]`  | `r p[1,5]`  |      
+| `r school.id[2]`         | `r p[2,1]`  | `r p[2,2]`  | `r p[2,3]`  | `r p[2,4]`  | `r p[2,5]`  |      
+| `r school.id[3]`         | `r p[3,1]`  | `r p[3,2]`  | `r p[3,3]`  | `r p[3,4]`  | `r p[3,5]`  |      
+| `r school.id[4]`         | `r p[4,1]`  | `r p[4,2]`  | `r p[4,3]`  | `r p[4,4]`  | `r p[4,5]`  |      
+| `r school.id[5]`         | `r p[5,1]`  | `r p[5,2]`  | `r p[5,3]`  | `r p[5,4]`  | `r p[5,5]`  |      
+| `r school.id[6]`         | `r p[6,1]`  | `r p[6,2]`  | `r p[6,3]`  | `r p[6,4]`  | `r p[6,5]`  |      
+| `r school.id[7]`         | `r p[7,1]`  | `r p[7,2]`  | `r p[7,3]`  | `r p[7,4]`  | `r p[7,5]`  |      
+| `r school.id[8]`         | `r p[8,1]`  | `r p[8,2]`  | `r p[8,3]`  | `r p[8,4]`  | `r p[8,5]`  |      
+
+Here we reproduce figure 5.8 (with the same problems as above)
+```{r,echo=TRUE}  
+par(mfrow=c(1,2))  
+par(mar = rep(2, 4))
+domain           <- c(-20,60)
+hist(s.theta[,1], breaks=10, xlab="Effect in School A", main="", xlim=domain)
+hist(apply(s.theta,1,max), breaks=10, xlab="Largest Effect", main="", xlim=domain)
+title(main="Figure 5.8 from BDA3")
+```  
+
+This last figure ("largest effect") is a good example of one the main advantage of a fully Bayesian hierarchical model: once we have correctly simulated the posterior, we can test all kinds of complicated hypothesis. 
+
+  * 5.3a (i) - For each school $j$, the probability that its coaching program is the best of eight:  
+**Important:** do not sort each posterior. 
+```{r, echo=TRUE}
+aux1            <- apply(s.theta,1,max)
+best            <- apply(1*(s.theta==aux1), 2,mean)
+```  
+
+**Table 2: Probability that each coaching program is the best among the eight schools**
+
+| School                   | Probability of having the best coaching program|  
+|  -----------:            | :-------------:          |  
+| `r school.id[1]`         | `r best[1]`  |  
+| `r school.id[2]`         | `r best[2]`  |  
+| `r school.id[3]`         | `r best[3]`  |  
+| `r school.id[4]`         | `r best[4]`  |  
+| `r school.id[5]`         | `r best[5]`  |  
+| `r school.id[6]`         | `r best[6]`  |  
+| `r school.id[7]`         | `r best[7]`  |  
+| `r school.id[8]`         | `r best[8]`  |  
+
+  * 5.3a (ii) - For each school $j$, the probability that its coaching program is better than other school $k$:  
+
+```{r, echo=TRUE}
+p               <- sapply(1:8,function(y) sapply(1:8,function(x) mean(1*(s.theta[,x]>s.theta[,y]))))
+```  
+
+**Table 2: Probability that $j$ (row) has a better program that school $k$ (column)**  
+
+| School $j$/School $k$|             |             |             |             |             |             |             |             |           
+|  -----------:        | :--------:  | :-------:   | :-------:   | :-----:     | :----:      | :----:      | :----:      | :----:      |        
+|                      |    A        |   B         |    C        |    D        |    E        |    F        |    G        |    H        |            
+| `r school.id[1]`     | `r p[1,1]`  | `r p[1,2]`  | `r p[1,3]`  | `r p[1,4]`  | `r p[1,5]`  | `r p[1,6]`  | `r p[1,7]`  | `r p[1,8]`  |      
+| `r school.id[2]`     | `r p[2,1]`  | `r p[2,2]`  | `r p[2,3]`  | `r p[2,4]`  | `r p[2,5]`  | `r p[2,6]`  | `r p[2,7]`  | `r p[2,8]`  |      
+| `r school.id[3]`     | `r p[3,1]`  | `r p[3,2]`  | `r p[3,3]`  | `r p[3,4]`  | `r p[3,5]`  | `r p[3,6]`  | `r p[3,7]`  | `r p[3,8]`  |      
+| `r school.id[4]`     | `r p[4,1]`  | `r p[4,2]`  | `r p[4,3]`  | `r p[4,4]`  | `r p[4,5]`  | `r p[4,6]`  | `r p[4,7]`  | `r p[4,8]`  |      
+| `r school.id[5]`     | `r p[5,1]`  | `r p[5,2]`  | `r p[5,3]`  | `r p[5,4]`  | `r p[5,5]`  | `r p[5,6]`  | `r p[5,7]`  | `r p[5,8]`  |      
+| `r school.id[6]`     | `r p[6,1]`  | `r p[6,2]`  | `r p[6,3]`  | `r p[6,4]`  | `r p[6,5]`  | `r p[6,6]`  | `r p[6,7]`  | `r p[6,8]`  |      
+| `r school.id[7]`     | `r p[7,1]`  | `r p[7,2]`  | `r p[7,3]`  | `r p[7,4]`  | `r p[7,5]`  | `r p[7,6]`  | `r p[7,7]`  | `r p[7,8]`  |      
+| `r school.id[8]`     | `r p[8,1]`  | `r p[8,2]`  | `r p[8,3]`  | `r p[8,4]`  | `r p[8,5]`  | `r p[8,6]`  | `r p[8,7]`  | `r p[8,8]`  |    
+
+  * 5.3b (i) - Now with $\tau = \infty$ compute for each school $j$, has the best coaching program:  
+  With $\tau = \infty$ each school posterior effect is independent $\theta_{j} \sim N(y_{y}, \sigma_{j}^{2})$. The probability of a school having the best coaching program is:  
+  **Wrong way to do it:[Discuss with Susan]**  
+$$
+\begin{align}  
+p(\theta_{j}>max_{i\neq j}\{\theta_{i}\}) &= \prod_{i\neq j} p(\theta_{j}>\theta_{i}) \\
+                                          &= \prod_{i\neq j} \Phi(\frac{\theta_{j} - \theta_{i}}{\sigma_{i}})  
+\end{align}
+$$
+  
+  **Right way to do it:**  
+$$
+\begin{align}  
+p(\theta_{j}>max_{i\neq j}\{\theta_{i}\}) &= \int \prod_{i\neq j} p(\theta_{j}>\theta_{i}) \phi(\theta_{j}|y_{j},\sigma_{j})d\theta_{j} \\
+                                          &= \int \prod_{i\neq j} \Phi\left(\frac{\theta_{j} - \theta_{i}}{\sigma_{i}}\right) \phi(\theta_{j}|y_{j},\sigma_{j})d\theta_{j}                               
+\end{align}
+$$
+
+This integral has to be solved numerically:
+```{r,echo=TRUE}  
+set.seed(142857)
+best            <-  sapply(1:8,
+                           function(y) mean(sapply(1:1000   ,
+                           function(x) prod(pnorm(( rnorm( 1,effect[y],se.effect[y] ) - effect[-y]) / se.effect[-y] )))
+                           )
+                           )
+# Ad-hoc normalization:
+best            <- best/sum(best)  
+```  
+
+**Table 2.1: Probability that each coaching program is the best among the eight schools (with $\tau = \infty$)**
+
+| School                   | Probability of having the best coaching program|  
+|  -----------:            | :-------------:          |  
+| `r school.id[1]`         | `r best[1]`  |  
+| `r school.id[2]`         | `r best[2]`  |  
+| `r school.id[3]`         | `r best[3]`  |  
+| `r school.id[4]`         | `r best[4]`  |  
+| `r school.id[5]`         | `r best[5]`  |  
+| `r school.id[6]`         | `r best[6]`  |  
+| `r school.id[7]`         | `r best[7]`  |  
+| `r school.id[8]`         | `r best[8]`  |  
+
+  * 5.3b (ii) - Now with $\tau = \infty$ compute for each school $j$, the probability that its coaching program is the better than other school $k$:  
+$$
+\begin{align}  
+p(\theta_{i}>\theta_{j}) &= p\left(-\frac{y_{j} - y_{i}}{\sqrt{\sigma_{i}^{2} + \sigma_{j}^{2}}} > \frac{(\theta_{j}-\theta_{i})- (y_{j} - y_{i})}{\sqrt{\sigma_{i}^{2} + \sigma_{j}^{2}}} \right) \\
+                         &= \Phi\left( \frac{y_{i} - y_{j}}{\sqrt{\sigma_{i}^{2} + \sigma_{j}^{2}}}\right)
+\end{align}
+$$  
+
+The following table presents the different values for the expression above:
+```{r, echo=TRUE}
+p               <- sapply(1:8,function(x) 
+                   sapply(1:8,function(y) 
+                  pnorm( q = 0, mean = (effect[x] - effect[y]) / sqrt(se.effect[x]^2 + se.effect[y]^2) , 
+                  sd = 1 )
+                  ) )  
+# Force all elementens in the diagonal to zero. 
+p               <- p - .5 * diag(8)
+```  
+
+**Table 2.1: Probability that $j$ (row) has a better program that school $k$ (column). With $\tau = \infty$**  
+
+| School $j$/School $k$|             |             |             |             |             |             |             |             |           
+|  -----------:        | :--------:  | :-------:   | :-------:   | :-----:     | :----:      | :----:      | :----:      | :----:      |        
+|                      |    A        |   B         |    C        |    D        |    E        |    F        |    G        |    H        |            
+| `r school.id[1]`     | `r p[1,1]`  | `r p[1,2]`  | `r p[1,3]`  | `r p[1,4]`  | `r p[1,5]`  | `r p[1,6]`  | `r p[1,7]`  | `r p[1,8]`  |      
+| `r school.id[2]`     | `r p[2,1]`  | `r p[2,2]`  | `r p[2,3]`  | `r p[2,4]`  | `r p[2,5]`  | `r p[2,6]`  | `r p[2,7]`  | `r p[2,8]`  |      
+| `r school.id[3]`     | `r p[3,1]`  | `r p[3,2]`  | `r p[3,3]`  | `r p[3,4]`  | `r p[3,5]`  | `r p[3,6]`  | `r p[3,7]`  | `r p[3,8]`  |      
+| `r school.id[4]`     | `r p[4,1]`  | `r p[4,2]`  | `r p[4,3]`  | `r p[4,4]`  | `r p[4,5]`  | `r p[4,6]`  | `r p[4,7]`  | `r p[4,8]`  |      
+| `r school.id[5]`     | `r p[5,1]`  | `r p[5,2]`  | `r p[5,3]`  | `r p[5,4]`  | `r p[5,5]`  | `r p[5,6]`  | `r p[5,7]`  | `r p[5,8]`  |      
+| `r school.id[6]`     | `r p[6,1]`  | `r p[6,2]`  | `r p[6,3]`  | `r p[6,4]`  | `r p[6,5]`  | `r p[6,6]`  | `r p[6,7]`  | `r p[6,8]`  |      
+| `r school.id[7]`     | `r p[7,1]`  | `r p[7,2]`  | `r p[7,3]`  | `r p[7,4]`  | `r p[7,5]`  | `r p[7,6]`  | `r p[7,7]`  | `r p[7,8]`  |      
+| `r school.id[8]`     | `r p[8,1]`  | `r p[8,2]`  | `r p[8,3]`  | `r p[8,4]`  | `r p[8,5]`  | `r p[8,6]`  | `r p[8,7]`  | `r p[8,8]`  |    
+
+
+  * 5.3c The estimated differences between the closed form solutions (5.3b) and the bayesian analysis (5.3a) is that the latter presents less extreme probability estimates (shrinkage)   
+  
+  * 5.3d If $\tau = 0$, then all effects are the same so the probabilities can be 0 or 1 for all schools (all are the largest effect and the smallest at the same time)
+  
+
+
+
+  * **5.13 - Bicycles**
+```{r 5.13.data,echo=TRUE}
+#Load data
+data             <- read.csv("C:/Users/fhocesde/Documents/tutorials/Bayesian/bicycles.txt", header=T, sep = "")
+data             <- data[1,]
+y                <- as.numeric(select(data,b1:b10))
+n                <- as.numeric(select(data, b1:b10)+select(data,v1:v10))
+```  
+
+  * 5.13a $y_{i}\sim Bin(\theta_{i},n_{i})$ where $n_{i}$ represents the *total* number of vehicles (bicycles + other vehicles). $\theta_{i}\sim Beta(\alpha,\beta)$ and noninformative hyperprior $p(\alpha,\beta) \propto (\alpha + \beta)^{-5/2}$. This implies that the **joint posterior** distribution is the the following (same as in \\ref{rat.joint.post} and equation 5.6 in BDA3): 
+
+$$
+\begin{align}
+p(\theta,\alpha,\beta|y) &\propto p(\alpha, \beta)p(\theta|\alpha, \beta)p(y|\theta,\alpha, \beta)\\ 
+p(\theta,\alpha,\beta|y) &\propto p(\alpha, \beta)\prod^{J}_{j=1} \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} \theta_{j}^{\alpha - 1} (1 - \theta_{j})^{\beta - 1}\prod^{J}_{j=1} \theta_{j}^{y_{j}} (1 - \theta_{j})^{n_{j}-y_{j}}\label{rat.joint.post1}
+\end{align}
+$$
+  
+  * 5.13b  Compute the marginal posterior of $\theta$, conditional on $\alpha, \beta$. For the beta-binomial case we have that given the hyper-parameters, each $\theta_{j}$ has a posterior distribution  $Beta(\alpha + y_{j}, \beta +n_{j} - y_{j})$. Assuming exchangeability:
+$$
+\begin{align}
+p(\theta|\alpha,\beta,y) &= \prod^{J}_{j=1} \frac{\Gamma(\alpha + \beta +n_{j})}{\Gamma(\alpha+y_{j})\Gamma(\beta+n_{j}-y_{j})} \theta_{j}^{\alpha+y_{j} - 1} (1 - \theta_{j})^{\beta+n_{j}-y_{j} - 1}\label{rat.cond.post.theta1}
+\end{align}
+$$
+
+  Now we compute the posterior marginal of $(\alpha,\beta)$. Given that we do have a closed form solution in step 2, we compute the ratio of (\\ref{rat.joint.post1}) and (\\ref{rat.cond.post.theta1}). 
+$$
+\begin{align}
+p(\alpha,\beta|y) &\propto \prod^{J}_{j=1} \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} \frac{\Gamma(\alpha+y_{j})\Gamma(\beta+n_{j}-y_{j})}{\Gamma(\alpha + \beta +n_{j})} \label{rat.marg.post.phi1}
+\end{align}
+$$
+
+Centering our grid around the methods of moments estimates for $(\alpha_{0}, \beta_{0})$:
+
+$$
+\begin{align}
+\hat{\mu}     &= `r mean(y/n)` = \frac{\hat{\alpha_{0}}}{\hat{\alpha_{0}}+\hat{\beta_{0}}}\\
+\hat{\sigma^2} &= `r sd(y/n)^2`   = \frac{\hat{\alpha_{0}}\hat{\beta_{0}}}{(\hat{\alpha_{0}}+\hat{\beta_{0}})^{2}(\hat{\alpha_{0}}+\hat{\beta_{0}}+1)}
+\end{align}
+$$
+
+Solving form $(\hat{\alpha_{0}},\hat{\beta_{0}})$:
+
+```{r,echo=TRUE}   
+#Here 'x' represents alpha and beta
+dslnex          <- function(x) {
+    z           <- numeric(2)
+    z[1]        <- x[1]/(x[1]+x[2]) - mean(y/n)
+    z[2]        <- x[1]*x[2]/(((x[1]+x[2])^2)*(x[1]+x[2]+1)) - sd(y/n)^2
+    z
+}
+
+sol1            <- nleqslv(c(1,1), dslnex) 
+res1            <- paste("(",round(sol1$x[1],1), ",", round(sol1$x[2],1), ")",sep="")
+```
+
+We get: $(\hat{\alpha_{0}},\hat{\beta_{0}}) = `r res1`$. 
+
+We center the grid (approximately) around that initial estimate and expand the grid to cover up to a factor of 4 of each parameter. The result is plotted in the following figure:  
+
+```{r, echo=TRUE}
+rat.marg.post.phi =  function(alpha, beta) {
+  post    = 1
+  #notice the censoring in n
+  for (i in 1:length(y)) {
+    if (n[i] > 100) n[i] = 100
+    post  = post * ( ( ( gamma(alpha + beta) ) / ( gamma(alpha) * gamma(beta) ) ) * 
+            ( ( gamma(alpha + y[i] ) * gamma(beta + n[i] - y[i]) )/( gamma(alpha + beta + n[i]) ) ) )
+  }
+  # The hyper prior is defined below
+  rat.hyper.prior(alpha,beta) * post
+}
+
+rat.hyper.prior   = function(alpha,beta) {
+  alpha*beta*(alpha + beta)^(-5/2)
+}
+
+
+v1        = seq(log(sol1$x[1]/sol1$x[2])*1.5,log(sol1$x[1]/sol1$x[2])/1.5,length.out =151)
+v2        = seq(log(sol1$x[1]+sol1$x[2])/1.5,log(sol1$x[1]+sol1$x[2])*1.5,length.out =151)
+beta      = exp(v2)/(exp(v1)+1)
+alpha     = exp(v2+v1)/(exp(v1)+1)
+
+post.dens = outer(alpha,beta,function(x1,x2) log(rat.marg.post.phi(x1, x2)) )
+post.dens = exp(post.dens - max(post.dens))
+post.dens = post.dens/sum(post.dens)
+
+contours <- seq(min(post.dens), max(post.dens) , length=10)
+contour(v1, v2, post.dens,levels=contours, xlab=expression(log(alpha/beta)), ylab=expression(log(alpha+beta)), xlim=c(min(v1),max(v1)) , ylim=c(min(v2),max(v2)), drawlabels=FALSE, main="Contour plot of joint posterior")
+```  
+
+Adjust the grid and repeat:
+
+```{r, echo=TRUE}
+v1              <-  seq(log(sol1$x[1]/sol1$x[2])*1.5,log(sol1$x[1]/sol1$x[2])/1.5,length.out =151)
+v2              <-  seq(log(sol1$x[1]+sol1$x[2])/3,log(sol1$x[1]+sol1$x[2])*1.5,length.out =151)
+beta            <-  exp(v2)/(exp(v1)+1)
+alpha           <-  exp(v2+v1)/(exp(v1)+1)
+
+post.dens       <-  outer(alpha,beta,function(x1,x2) log(rat.marg.post.phi(x1, x2)) )
+post.dens       <-  exp(post.dens - max(post.dens))
+post.dens       <-  post.dens/sum(post.dens)
+
+contours        <- seq(min(post.dens), max(post.dens) , length=10)
+contour(v1, v2, post.dens,levels=contours, xlab=expression(log(alpha/beta)), ylab=expression(log(alpha+beta)), xlim=c(min(v1),max(v1)) , ylim=c(min(v2),max(v2)), drawlabels=FALSE, main="Contour plot of joint posterior")
+```  
+
+Draw samples $(\alpha^{s}, \beta^{s})$ from $p(\alpha,\beta|y)$ (finally!). Here we repeat the procedure used in section 3.(v) of the book replication document.  
+        
+    
+```{r, echo=TRUE}
+samps       = 1000
+v1.dens     = apply(post.dens ,1, sum)
+s.v1        = sample(v1,samps, replace=TRUE, prob = v1.dens)
+
+#Select the colum of the joint density corresponding to a specific value of v1 (p(v2|v1))
+cond.v2     = function(x) {
+  post.dens[which(v1 == s.v1[x]),]
+}
+#Sample a value of v2 according the the conditional probatility above
+s.v2        = sapply(1:samps,function(x) sample(v2,1,replace=TRUE,prob=cond.v2(x)))
+
+#Add a uniform random jitter centered at zero with with equal to the grid spacing. This will make the simulation draws more continuous. Plot the sampled values.  
+grid.v1     = v1[2]-v1[1]
+grid.v2     = v2[2]-v2[1]
+s.v2        = s.v2 + runif(length(s.v2),-grid.v2/2,grid.v2/2)
+s.v1        = s.v1 + runif(length(s.v1),-grid.v1/2,grid.v1/2)
+plot(s.v1, s.v2, xlab=expression(log(alpha/beta)^s), ylab=expression(log(alpha+beta)^s), xlim=c(min(v1),max(v1)) , ylim=c(min(v2),max(v2)), main="Scatter Plot of Sample Draws of log(alpha/beta) and log(alpha+beta)")
+```  
+
+By applying the inverse of the transformation we recover the marginal distribution of the original hyper-parameters. 
+
+```{r, echo=TRUE}
+s.beta      = exp(s.v2)/(exp(s.v1)+1)
+s.alpha     = exp(s.v2+s.v1)/(exp(s.v1)+1)
+```
+
+  * 5.13c For each draw of $\phi^{s}$, draw a sample of $\theta$ from $p(\theta|\phi^{s},y)$ 
+```{r, echo=TRUE}
+s.beta      = exp(s.v2)/(exp(s.v1)+1)
+s.alpha     = exp(s.v2+s.v1)/(exp(s.v1)+1)
+theta.dist  = sapply(1:10, function(x) rbeta(1000,s.alpha+y[x], s.beta + n[x] - y[x]))
+theta.dist  = apply(theta.dist,2,sort)
+plot(0:600/1000,0:600/1000, type="l", xlab="Observed rate",ylab="95% CI and median of posterior")
+jitter.x    = y/n + runif(length(y),-0.01,0.01)
+points(jitter.x,theta.dist[500,])
+segments(jitter.x,theta.dist[25,], jitter.x,theta.dist[975,] )
+title(main="Posterior Distribution of Bike rates for all 10 streets")
+```   
+
+  The estimated proportions are almost the same as the raw proportions (no shrinkage).  
+  
+  * 5.13d  We generate 1000 draws from a $Beta(\alpha^{s},\beta^{s})$ where the parameters come from the draws obtained above:
+    
+```{r,echo=TRUE}  
+s.theta         <- rbeta(1000, shape1 =s.alpha , shape2 = s.beta)   
+CI.num          <- round(s.theta[order(s.theta)][c(25,975)],2)
+CI.str          <- paste("(" , CI.num[1] , "," , CI.num[2] , ")")
+```
+
+The posterior interval for $\hat{\theta} = `r CI.str`$   
+
+  * 5.13e If a new street is opening with 100 vehicles per day. The posterior interval predicts with 95% confidence that between `r CI.num[1]*100` and `r CI.num[2]*100`. This CI is not so informative as it covers almost all the possible oberved bike rates. 
+  
+  * 5.13f The beta assumption might not have been so reasonable as the posterior estimates did not show much shrinkage. 
+  
+  
+  * **5.14**  
+  * *5.14a* Set up a model in which the total number of vehicles observed at each location $j$ follows a Poisson distribution with parameter $\theta_{j}$, the 'true' rate of traffic per hour at the location. Assign a gamma population distribution for the parameters $\theta_{j}$ and a noninformative hyperprior distribution. Write down the joint posterior distribution.   
+  
+  Now we have that $n_{j} \sim Poi(\lambda =\theta_{j})$ and $\theta_{j} \sim Gamma(\alpha)$. And the joint posterior is:  
+
+$$
+\begin{align}
+p(\theta,\alpha,\beta|y) &\propto p(\alpha, \beta) \times p(\theta|\alpha, \beta) \times p(y|\theta,\alpha, \beta) \nonumber \\ 
+p(\theta,\alpha,\beta|y) &\propto 1\times \prod_{j=1}^{10}Gamma(\theta_{j} | \alpha, \beta) \times \prod_{j=1}^{10}Poisson(y_{j}|\theta_{j}) \nonumber \\
+&= \prod_{j=1}^{10}\frac{\beta^{\alpha}}{\Gamma(\alpha)}\theta_{j}^{\alpha-1}exp(-\beta \theta) \times \frac{\theta_{j}^{y_{i}}exp(-\theta_{j})}{!y_{j}} \nonumber \\
+&\propto \frac{\beta^{n\alpha}}{\Gamma(\alpha)^{n}}exp(-\sum \theta_{j}( 1 + \beta )) \prod_{j=1}^{10} \theta_{j}^{\alpha + y_{j}-1} \label{bic.joint.post2}
+\end{align}
+$$
+
+* *5.14b*  
+Then compute the marginal posterior of $\theta$, conditional on $\alpha, \beta$. For the gamma-poisson case we have that given the hyper-parameters, each $\theta_{j}$ has a posterior distribution  $Gamma(\alpha + n_{j}, \beta +1)$. Assuming exchangeability:  
+
+$$
+\begin{align}
+p(\theta|\alpha,\beta,y) &\propto \prod_{j=1}^{10}Gamma(\theta_{j} | \alpha +y_{j}, \beta+1) \nonumber \\
+&\propto \prod_{j=1}^{10}Gamma(\theta_{j} | \alpha +y_{j}, \beta+1) \nonumber \\
+&\propto \prod_{j=1}^{10} \theta_{j}^{\alpha + y_{j} -1}exp(-(\beta+1) \theta_{j})
+\label{bic.cond.post.theta2}
+\end{align}
+$$
+
+  Now we compute the posterior marginal of $(\alpha,\beta)$. Given that we do have a closed form solution in step 2, we compute the ratio of (\\ref{bic.joint.post2}) and (\\ref{bic.cond.post.theta2}). 
+$$
+\begin{align}
+p(\alpha,\beta|y) &\propto \frac{\beta^{n\alpha}}{\Gamma(\alpha)^{n}} \prod_{i=1}^{n}\frac{\Gamma(\alpha+y_{i})}{(\beta + 1)^{\alpha+y_{i}}}
+\label{bic.marg.post.phi}
+\end{align}
+$$
+
+Centering our grid around the methods of moments estimates for $(\alpha_{0}, \beta_{0})$:
+
+$$
+\begin{align}
+\hat{\mu}     &= `r mean(n)`  = \frac{\hat{\alpha_{0}}}{\hat{\beta_{0}}}\\
+\hat{\sigma^2} &= `r sd(n)^2` = \frac{\hat{\alpha_{0}}}{\hat{\beta_{0}}^2}
+\end{align}
+$$
+
+Solving for $(\hat{\alpha_{0}},\hat{\beta_{0}})$:
+
+```{r,echo=TRUE}   
+#Here 'x' represents alpha and beta
+dslnex          <- function(x) {
+    z           <- numeric(2)
+    z[1]        <- x[1]/(x[2]) - mean(n)
+    z[2]        <- x[1]/(x[2]^2) - sd(n)^2
+    z
+}
+
+sol1            <- nleqslv(c(1,1), dslnex) 
+res1            <- paste("(",round(sol1$x[1],1), ",", round(sol1$x[2],2), ")",sep="")
+```
+
+We get: $(\hat{\alpha_{0}},\hat{\beta_{0}}) = `r res1`$. 
+
+We center the grid (approximately) around that initial estimate and expand the grid to cover up to a factor of 4 of each parameter. The result is plotted in the following figure:  
+ 
+```{r, echo=TRUE}
+bic.marg.post.phi <-   function(alpha, beta) {
+  log.post          <-  0
+  #notice the censoring in n
+  for (i in 1:length(n)) 
+  {
+    if (n[i] > 100) n[i]  <-  100
+    log.post        <-  log.post + log(gamma( alpha+n[i] )) - (alpha+n[i])*log((beta + 1))
+  }
+  # The hyper prior is defined below
+  log(bic.hyper.prior2(alpha,beta)) + log.post + (length(n)*alpha)*log(beta) - length(n)*log(gamma(alpha))
+}
+
+bic.hyper.prior2 <-  function(alpha,beta) {
+  1
+}
+
+
+alpha           <-  seq(sol1$x[1]/1.5,sol1$x[1]*1.5,length.out =151)
+beta            <-  seq(sol1$x[2]/1.5,sol1$x[2]*1.5,length.out =151)
+
+post.dens       <-  outer(alpha,beta,function(x1,x2) bic.marg.post.phi(x1, x2) )
+post.dens       <-  exp(post.dens - max(post.dens))
+post.dens       <-  post.dens/sum(post.dens)
+
+
+
+contours        <- seq(min(post.dens), max(post.dens), length=10)
+contour(alpha, beta, post.dens,levels=contours, xlab=expression(alpha), ylab=expression(beta), xlim=c(min(alpha),max(alpha)) , ylim=c(min(beta),max(beta)), drawlabels=FALSE, main="Contour plot of joint posterior")
+```  
+
+Adjust the grid and repeat:
+
+```{r, echo=TRUE}  
+alpha           <-  seq(sol1$x[1]/1.5,sol1$x[1]*12,length.out =151)
+beta            <-  seq(sol1$x[2]/1.5,sol1$x[2]*12,length.out =151)
+
+post.dens       <-  outer(alpha,beta,function(x1,x2) bic.marg.post.phi(x1, x2) )
+post.dens       <-  exp(post.dens - max(post.dens))
+post.dens       <-  post.dens/sum(post.dens)
+
+contours        <- seq(min(post.dens), max(post.dens) , length=10)
+contour(alpha, beta, post.dens,levels=contours, xlab=expression(alpha), ylab=expression(beta), xlim=c(min(alpha),max(alpha)) , ylim=c(min(beta),max(beta)), drawlabels=FALSE, main="Contour plot of joint posterior")
+```  
+
+Draw samples $(\alpha^{s}, \beta^{s})$ from $p(\alpha,\beta|y)$. 
+    
+```{r, echo=TRUE}
+samps           <-  1000
+alpha.dens      <-  apply(post.dens ,1, sum)
+s.alpha         <-  sample(alpha,samps, replace=TRUE, prob = alpha.dens)
+
+#Select the colum of the joint density corresponding to a specific value of v1 (p(beta|alpha))
+cond.beta       <-  function(x) {
+  post.dens[which(alpha == s.alpha[x]),]
+}
+#Sample a value of v2 according the the conditional probatility above
+s.beta          <-  sapply(1:samps,function(x) sample(beta,1,replace=TRUE,prob=cond.beta(x)))
+
+#Add a uniform random jitter centered at zero with with equal to the grid spacing. This will make the simulation draws more continuous. Plot the sampled values.  
+grid.alpha      <-  alpha[2]-alpha[1]
+grid.beta       <-  beta[2]-beta[1]
+s.beta          <-  s.beta + runif(length(s.beta),-grid.beta/2,grid.beta/2)
+s.alpha         <-  s.alpha + runif(length(s.alpha),-grid.alpha/2,grid.alpha/2)
+plot(s.alpha, s.beta, xlab=expression(alpha), ylab=expression(beta), xlim=c(min(alpha),max(alpha)) , ylim=c(min(beta),max(beta)), main="Scatter Plot of Sample Draws of alpha and beta")
+```  
+
+**Note:** regardless of how much I change the range of $\alpha$ and $\beta$ I dont seem to cover the whole graph. 
+* *5.14c* Given the previous result we can say that the posterior is not integrable.   
+* *5.14d* I don't know how to alter it such that it becomes integrable.
+ 
+  * **10.1**       
+  (To do)  
+  
+  
+  * **10.4a**       
+  (To do)    
+  
+  
+  * **11.2**       
+  (To do) 
+  
+  
+  * **11.3**       
+  (To do)  
+  
+  
+  * **11.6a**       
+  (To do)    
+  
+  * **12**       
+  Install and run examples in STAN [DONE] 
+  
+  
+  * **14**       
+  (To do)  
+  *Suggestion:* Run a logit regression using a frequentist (through ML) and Bayesian (through GS or MH) and compare the results.   
+  
+  * **15**       
+  (To do)  
+  *Suggestion:* Run a full HLM example and compare with a fixed effect regression. 
+  
