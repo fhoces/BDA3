@@ -2,8 +2,8 @@
 title: 'Tutorial on Bayesian Statistics: Replicating Sections of BDA3'
 author: "Fernando Hoces de la Guardia"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
   word_document: default
 ---
 <script type="text/x-mathjax-config">

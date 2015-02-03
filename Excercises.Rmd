@@ -569,42 +569,53 @@ Draw samples $(\alpha^{s}, \beta^{s})$ from $p(\alpha,\beta|y)$ (finally!). Here
         
     
 ```{r, echo=TRUE}
-samps       = 1000
-v1.dens     = apply(post.dens ,1, sum)
-s.v1        = sample(v1,samps, replace=TRUE, prob = v1.dens)
+samps           <-  1000
+#Integrate (sum) over all beta to get the marginal of alpha
+v1.dens         <-  apply(post.dens ,1, sum)
+s.v1            <-  sample(v1, samps, replace=TRUE, prob = v1.dens)
 
 #Select the colum of the joint density corresponding to a specific value of v1 (p(v2|v1))
-cond.v2     = function(x) 
+cond.v2         <-  function(x) 
 {
   post.dens[which(v1 == s.v1[x]),]
 }
 #Sample a value of v2 according the the conditional probatility above
-s.v2        = sapply(1:samps,function(x) sample(v2,1,replace=TRUE,prob=cond.v2(x)))
+s.v2            <-  sapply(1:samps,function(x) sample(v2,1,replace=TRUE,prob=cond.v2(x)))
 
 #Add a uniform random jitter centered at zero with with equal to the grid spacing. This will make the simulation draws more continuous. Plot the sampled values.  
-grid.v1     = v1[2]-v1[1]
-grid.v2     = v2[2]-v2[1]
-s.v2        = s.v2 + runif(length(s.v2),-grid.v2/2,grid.v2/2)
-s.v1        = s.v1 + runif(length(s.v1),-grid.v1/2,grid.v1/2)
-plot(s.v1, s.v2, xlab=expression(log(alpha/beta)^s), ylab=expression(log(alpha+beta)^s), xlim=c(min(v1),max(v1)) , ylim=c(min(v2),max(v2)), main="Scatter Plot of Sample Draws of log(alpha/beta) and log(alpha+beta)")
+grid.v1         <-  v1[2] - v1[1]
+grid.v2         <-  v2[2] - v2[1]
+s.v2            <-  s.v2 + runif(length(s.v2),-grid.v2/2,grid.v2/2)
+s.v1            <-  s.v1 + runif(length(s.v1),-grid.v1/2,grid.v1/2)
+plot(s.v1, s.v2, 
+     xlab=expression( log(alpha/beta)^s ), 
+     ylab=expression( log(alpha+beta)^s ), 
+     xlim=c( min(v1) , max(v1) ) , 
+     ylim=c( min(v2) , max(v2) ), 
+     main="Scatter Plot of Sample Draws of log(alpha/beta) and log(alpha+beta)")
 ```  
 
 By applying the inverse of the transformation we recover the marginal distribution of the original hyper-parameters. 
 
 ```{r, echo=TRUE}
-s.beta      = exp(s.v2)/(exp(s.v1)+1)
-s.alpha     = exp(s.v2+s.v1)/(exp(s.v1)+1)
+s.beta          <-  exp( s.v2 ) / ( exp(s.v1)+1 )
+s.alpha         <-  exp( s.v2 + s.v1 ) / ( exp(s.v1)+1 )  
 ```
 
   * 5.13c For each draw of $\phi^{s}$, draw a sample of $\theta$ from $p(\theta|\phi^{s},y)$ 
 ```{r, echo=TRUE}
-s.beta      = exp(s.v2)/(exp(s.v1)+1)
-s.alpha     = exp(s.v2+s.v1)/(exp(s.v1)+1)
-theta.dist  = sapply(1:10, function(x) rbeta(1000,s.alpha+y[x], s.beta + n[x] - y[x]))
-theta.dist  = apply(theta.dist,2,sort)
-plot(0:600/1000,0:600/1000, type="l", xlab="Observed rate",ylab="95% CI and median of posterior")
-jitter.x    = y/n + runif(length(y),-0.01,0.01)
-points(jitter.x,theta.dist[500,])
+theta.dist      <-  sapply(1:10, 
+                           function(x) 
+                             rbeta(1000, s.alpha+y[x], s.beta + n[x] - y[x])
+                           )
+theta.dist      <-  apply(theta.dist,2,sort)
+plot(0:600/1000, 0:600/1000,  
+     type="l", 
+     xlab="Observed rate",
+     ylab="95% CI and median of posterior")
+
+jitter.x        <-  y/n + runif(length(y),-0.01,0.01)
+points(jitter.x, theta.dist[500,])
 segments(jitter.x,theta.dist[25,], jitter.x,theta.dist[975,] )
 title(main="Posterior Distribution of Bike rates for all 10 streets")
 ```   
@@ -764,7 +775,7 @@ plot(s.alpha, s.beta, xlab=expression(alpha), ylab=expression(beta), xlim=c(min(
  
   * **10.1**       
   * *10.1a*        
-  If $\theta \sim N(\mu, \sigma_{\theta})$ then $R$ draws $y^{(r)}$ from will have a simulation standard error of $\hat{\sigma_{\theta}}/\sqrt{R}$. Hence in order to be within $0.1 \sigma_{\theta}$ we need $R=100$.  
+  If $\theta \sim N(\mu, \sigma_{\theta})$ then $R$ draws $y^{(r)}$ will have a simulation standard error of $\hat{\sigma_{\theta}}/\sqrt{R}$. Hence in order to be within $0.1 \sigma_{\theta}$ we need $R=100$.  
   * *10.1b*        
   For the simulation excercise we choose $\mu=0, \sigma_{\theta}=1$. We perform R draws and for each set of simulated numbers, we compute the 2.5% percentile $\{y^{r}\}_{p=0.025}$ and its difference with the theoretical percentile (-1.96), we repeat this excercise 100 times and look at the average of the difference for different values of $R$.  
 
@@ -814,8 +825,7 @@ $$
 
 
 * **11.2**       
-  (To do) 
-  
+Replicate the computations for the bioassay example of section 3.7 using the Metropolis algorithm. Be sure to define your starting points and your jumping rule.   
   
   * **11.3**       
   (To do)  

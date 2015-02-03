@@ -84,16 +84,16 @@ print(c(median_low=median(ci.mu[,1]), median_high=median(ci.mu[,2]), p10_low =qu
 <h3>2 - Simulating values from a postetior normal with <span class="math">\(\sigma^{2}\)</span> and <span class="math">\(\mu\)</span> unknown and conjugate prior.</h3>
 <p>The following is not an exercise in the book (that I’m aware of), but I though that it would be interesting to work on this. After going over the model derived in pg 67-69 in BDA3, I will simulate values from the joint posterior (and hopefully leave the code flexible enough to play later on with the hyper-parameters).</p>
 <p>With the prior density: <span class="math">\[
-\begin{align}
+\begin{aligned}
 p(\mu,\sigma^{2}) &amp;\propto \sigma^{-1}(\sigma^{2})^{(\nu_{0}/2 + 1}exp\left ( -\frac{1}{2\sigma^{2}} [\nu_{0}\sigma^{2}_{0} + \kappa_{0}(\mu_{0} - \mu)^{2} ]\right )
-\end{align}
+\end{aligned}
 \]</span> And a likelihood: <span class="math">\[
-\begin{align}
+\begin{aligned}
 p(y|\mu,\sigma^{2}) &amp;\propto \sigma^{-n}exp\left ( -\frac{1}{2\sigma^{2}} [(n-1)s^{2} + n(\bar{y} - \mu)^{2} ]\right )
-\end{align}
+\end{aligned}
 \]</span></p>
 <p>We obtain the following joint posterior: <span class="math">\[
-\begin{align}
+\begin{aligned}
 p(\mu,\sigma^{2}|y) &amp;\propto \sigma^{-1}(\sigma^{2})^{(\nu_{0}/2 + 1}exp\left ( -\frac{1}{2\sigma^{2}} [\nu_{0}\sigma^{2}_{0} + \kappa_{0}(\mu_{0} - \mu)^{2} ]\right ) \times \nonumber \\
 &amp;\times (\sigma^{2})^{-n/2}exp\left ( -\frac{1}{2\sigma^{2}} [(n-1)s^{2} + n(\bar{y} - \mu)^{2} ]\right ) \nonumber\\
 &amp;= N-Inv-\chi^{2}(\mu_n,\sigma^{2}_{n};\nu_{n},\sigma^{2}_{n})\\
@@ -101,13 +101,13 @@ p(\mu,\sigma^{2}|y) &amp;\propto \sigma^{-1}(\sigma^{2})^{(\nu_{0}/2 + 1}exp\lef
 \kappa_{n} &amp;= \kappa_{0} + n \nonumber\\
 \nu_{n} &amp;= \nu_{0} + n \nonumber\\
 \nu_{n}\sigma_{n}^{2} &amp;=  \nu_{0}\sigma_{0}^{2} + (n-1)s^{2} + \frac{\kappa_{0}n}{\kappa_{0} + n} (\bar{y} - \mu_0)^{2}. \nonumber
-\end{align}
+\end{aligned}
 \]</span></p>
 <p>Using the fact that <span class="math">\(p(\mu,\sigma^{2}|y) = p(\mu|\sigma^{2},y)p(\sigma^{2}|y)\)</span> with:<br /><span class="math">\[
-\begin{align}
+\begin{aligned}
 \mu|\sigma^{2},y  &amp;\sim N(\mu_{n},\sigma^{2}_{n}/\kappa_{n})  \label{post.mu}\\
-\sigma^{2}|y      &amp;\sim  Inv-\chi^{2}(\nu_{n},\sigma^{2}_{n}) \label{post.sig}\\
-\end{align}
+\sigma^{2}|y      &amp;\sim  Inv-\chi^{2}(\nu_{n},\sigma^{2}_{n}) \\label{post.sig}\\
+\end{aligned}
 \]</span> The simulation algorithm is as follows:<br />* Draw a random number from the conditional posterior of sigma (equation \ref{post.sig})<br />* Using that value of <span class="math">\(\sigma^{2}\)</span>, draw a random number for the conditional posterior of <span class="math">\(\mu\)</span> (equation \ref{post.mu})</p>
 <p>The following code implements this algorithm.</p>
 <pre class="r"><code># Hyperparameters
@@ -142,9 +142,9 @@ legend(&quot;topleft&quot;,col = c(&quot;red&quot;,&quot;black&quot;) ,legend=c(
 <p>The plot above should be in 3D (<span class="math">\(\sigma^{2}, \mu, p(\sigma^{2}, \mu|y)\)</span>) but still don’t know how to do that in R.</p>
 <p>It also happens that for this particular problem there is a close form solution for the marginal of <span class="math">\(\mu\)</span>. (remember that <span class="math">\(p(\mu|y) = \int p(\mu|\sigma^{2},y) p(\sigma^{2}|y)d\sigma^{2}\)</span>):</p>
 <p><span class="math">\[
-\begin{align}
+\begin{aligned}
 \mu|\sigma^{2},y &amp;\sim t_{\nu_{n}}(\mu|\mu_{n}, \sigma^2_{n}/\kappa_{n})
-\end{align}
+\end{aligned}
 \]</span></p>
 <p><strong>I’m still confused with the following</strong> why is that to simulate the marginal of <span class="math">\(\mu\)</span> (<span class="math">\(\mu|\sigma^2,y\)</span>) I just need to draw from the conditional posterior of the mean (equation \ref{post.mu}). More generally, my confusion is the following: why is that to simulate <span class="math">\(h(x) = \int g(x) dF(x)\)</span> I just need to draw <span class="math">\(x^{s}\)</span> from <span class="math">\(dF(x)\)</span> and evaluate <span class="math">\(g(x^{s})\)</span>. I know from MC simulation that by the LLN <span class="math">\(E_{dF}[g(x)] = \int g(x) dF(x) \approx \sum_{s}g(x^{s})/S\)</span>, but I’m having trouble seen why is that this applies to all points in the distribution (and not just the mean).</p>
 <p><strong>My own explanation so far:</strong> as MC can be used to approximate the mean using the LLN, the same technique can be used to approximate the whole distribution using CLT.</p>
@@ -161,14 +161,14 @@ aux1        = aux1 / apply(aux1,1,sum)</code></pre>
 <h3>3 - Replicating Simulation Example 3.7 from BDA3 (pg 74+)</h3>
 <p>We are interested in modeling the dose-response of a certain drug (<span class="math">\(x_{i}\)</span>) over the number of dead’s (<span class="math">\(y_{i}\)</span>) in a group of trial animals (<span class="math">\(n_{i}\)</span>).We have 4 observations. Defining <span class="math">\(\theta_{i}\)</span> as the true death rate for each dosage, we can model this phenomena using a binomial distribution (<span class="math">\(y_{i} \sim Bin(n_{i},\theta_{i})\)</span>). To model the dose-response relationship we start by looking at <span class="math">\(\theta_{i} = \alpha +\beta x_{i}\)</span> but we realize that this model predicts values out of range (<span class="math">\(\theta\)</span>, as a probability has to be between 0 and 1). Hence we apply the logit (<span class="math">\(log(\theta_{i}/(1-\theta_{i}))\)</span>) transformation. This implies the following likelihood.</p>
 <p><span class="math">\[
-\begin{align}
+\begin{aligned}
 p(y_{i}|\alpha,\beta,n_{i},x_{i}) \propto [logit^{-1}(\alpha +\beta x_{i})]^{y_i}[1-logit^{-1}(\alpha +\beta x_{i})]^{n_{i}- y_{i}}
-\end{align}
+\end{aligned}
 \]</span></p>
 <p><strong>Question for Susan: why is that in the likelihood above we do not multiply by the Jacobian of the transformation?</strong> Using a non-informative prior (<span class="math">\(p(\alpha,\beta)\propto 1\)</span>) we get that the conditional posterior has the form: <span class="math">\[
-\begin{align}
+\begin{aligned}
 p(\alpha,\beta|y,n,x) \propto \prod_{i=1}^{k} p(y_{i}|\alpha,\beta,n_{i},x_{i}) \label{post.1}
-\end{align}
+\end{aligned}
 \]</span></p>
 <p>First we compute, as a rough approximation of the parameters, the ML estimates.</p>
 <pre class="r"><code># Data
@@ -257,30 +257,30 @@ plot(s.alpha, s.beta, xlab=expression(alpha^s), ylab=expression(beta^s), xlim=c(
 <li>Compute the marginal of the other parameter (<span class="math">\(p(\theta_{1}|y)\)</span>) using the following identity:</li>
 </ol>
 <p><span class="math">\[
-\begin{align}
+\begin{aligned}
 p(\theta_{1}|y) = \int p(\theta_{1}|\theta_{2},y) p(\theta_{2}|y) d\theta_{2} \approx p(\theta_{1}|\theta^{s}_{2},y)
-\end{align}
+\end{aligned}
 \]</span> Where <span class="math">\(\theta^{s}_{2}\)</span> is a random draw using <span class="math">\(p(\theta_{2}|y)\)</span> (the justification for this last step is in section 2 of this document).</p>
 <p>Now we will distinguish between two sets of parameters. The original parameters of interest, still represented by <span class="math">\(\theta\)</span>. And the parameters of the prior distribution, or <em>hyperparameters</em> represented by <span class="math">\(\phi\)</span>. This two sets of parameters fully describe the probabilistic process and have a joint distribution function:</p>
 <p><span class="math">\[
-\begin{align}
+\begin{aligned}
 p(\phi,\theta) = p(\phi)p(\theta|\phi) \label{joint}
-\end{align}
+\end{aligned}
 \]</span></p>
 <p>And a joint posterior distribution: <span class="math">\[
-\begin{align}
+\begin{aligned}
 p(\phi,\theta|y) &amp;\propto p(\theta,\phi) p(y|\theta,\phi) \nonumber\\  
                  &amp;= p(\phi)p(\theta|\phi)p(y|\theta) \label{joint.post}
-\end{align}
+\end{aligned}
 \]</span> Where in the last line we used the assumption that <span class="math">\(p(y|\theta,\phi)\)</span> depends on <span class="math">\(\phi\)</span> only through <span class="math">\(\theta\)</span>. We call <span class="math">\(p(\phi)\)</span> the <em>hyperprior distribution</em>, <span class="math">\(p(\theta|\phi)\)</span> the population distribution, and the usual suspect <span class="math">\(p(y|\theta)\)</span> is the likelihood, or sampling, distribution.</p>
 <p><strong>As always our goal is to make inference about <span class="math">\(\theta\)</span></strong> (and maybe <span class="math">\(\phi\)</span> also?). As in the exercise before, our end result will be a set of matrices <span class="math">\((\{\phi^{s}\}), (\{\theta^{s}\})\)</span> with values for the parameters that follow the posterior joint distribution. To get this result we take the following steps:</p>
 <ol style="list-style-type: decimal">
 <li>Compute the conditional joint posterior <span class="math">\(p(\phi,\theta|y)\)</span>. Choosing the right hyper-prior distribution is a whole topic on itself and will be addressed later.</li>
 <li>Compute the marginal posterior of <span class="math">\(\theta\)</span>, conditional on <span class="math">\(\phi\)</span>, <span class="math">\(p(\theta|\phi,y)\)</span>. This conditional posterior of <span class="math">\(\theta\)</span> can be obtain analytically in conjugate models for a given value of <span class="math">\(\phi\)</span>, it is simply the posterior of the non-hierarchical Bayesian case.<br /></li>
 <li>Compute the posterior marginal of <span class="math">\(\phi\)</span>. When step 2 has a closed form solution we can compute the marginal of <span class="math">\(\phi\)</span> as:<br /><span class="math">\[
-\begin{align}
+\begin{aligned}
 p(\phi|y) &amp;= \frac{p(\theta,\phi |y)}{p(\theta|\phi,y)} \label{marg.post.phi}
-\end{align}
+\end{aligned}
 \]</span></li>
 </ol>
 <p>In the absence of a closed form solution for step 2. We can compute the marginal by integrating the joint over all the possible values of <span class="math">\(\theta\)</span>.<br /> 4. Draw samples <span class="math">\(\phi^{s}\)</span> from <span class="math">\(p(\phi|y)\)</span>. Notice that <span class="math">\(\phi\)</span> can have multiple components. If it has more than one element we follow the procedure described at the beginning of this section.<br /> 5. For each draw of <span class="math">\(\phi^{s}\)</span>, draw a sample of <span class="math">\(\theta\)</span> from <span class="math">\(p(\theta|\phi^{s},y)\)</span>. <strong>This allow us to fully characterize the parameter of interest (our goal, remember?)</strong></p>
@@ -288,20 +288,20 @@ p(\phi|y) &amp;= \frac{p(\theta,\phi |y)}{p(\theta|\phi,y)} \label{marg.post.phi
 <p>We have data from <span class="math">\(j = 1 \dots J, J = 71\)</span> experiments where, in each experiment <span class="math">\(n_{j}\)</span> rats were exposed to a drug and <span class="math">\(y_{j}\)</span> of them, presented tumors afterwards (think also something similar to unemployment rate in different states with <span class="math">\(n_{j}\)</span> people in the active labor force and <span class="math">\(y_{j}\)</span> unemployed). The results from the experiments are assumed to follow a binomial distribution (<span class="math">\(y_{j}|\theta_{j} \sim Bin(n_{j},\theta_{j})\)</span>), and the parameters <span class="math">\(\theta_{j}\)</span> are assume to follow a beta prior distribution (<span class="math">\(\theta_{j}|\alpha,\beta \sim Beta(\alpha,\beta)\)</span>), this last assumption is made to take advantage of conjugacy. With all this elements now we can follow the steps described above.</p>
 <ol style="list-style-type: decimal">
 <li><p>Compute the conditional joint posterior <span class="math">\(p(\phi=(\alpha,\beta),\theta = \{\theta_{j}\}_{j=1}^{J}|y)\)</span>. <span class="math">\[
-\begin{align}
+\begin{aligned}
 p(\theta,\alpha,\beta|y) &amp;\propto p(\alpha, \beta)p(\theta|\alpha, \beta)p(y|\theta,\alpha, \beta) \nonumber\\ 
 p(\theta,\alpha,\beta|y) &amp;\propto p(\alpha, \beta)\prod^{J}_{j=1} \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} \theta_{j}^{\alpha - 1} (1 - \theta_{j})^{\beta - 1}\prod^{J}_{j=1} \theta_{j}^{y_{j}} (1 - \theta_{j})^{n_{j}-y_{j}}\label{rat.joint.post}
-\end{align}
+\end{aligned}
 \]</span></p></li>
 <li><p>Compute the marginal posterior of <span class="math">\(\theta\)</span>, conditional on <span class="math">\(\alpha, \beta\)</span>. For the beta-binomial case we have that given the hyper-parameters, each <span class="math">\(\theta_{j}\)</span> has a posterior distribution <span class="math">\(Beta(\alpha + y_{j}, \beta +n_{j} - y_{j})\)</span>. Assuming exchangeability: <span class="math">\[
-\begin{align}
+\begin{aligned}
 p(\theta|\alpha,\beta,y) &amp;= \prod^{J}_{j=1} \frac{\Gamma(\alpha + \beta +n_{j})}{\Gamma(\alpha+y_{j})\Gamma(\beta+n_{j}-y_{j})} \theta_{j}^{\alpha+y_{j} - 1} (1 - \theta_{j})^{\beta+n_{j}-y_{j} - 1}\label{rat.cond.post.theta}
-\end{align}
+\end{aligned}
 \]</span></p></li>
 <li><p>Compute the posterior marginal of <span class="math">\((\alpha,\beta)\)</span>. Given that we do have a closed form solution in step 2, we compute the ratio of (\ref{rat.joint.post}) and (\ref{rat.cond.post.theta}). <span class="math">\[
-\begin{align}
+\begin{aligned}
 p(\alpha,\beta|y) &amp;\propto p(\alpha, \beta)\prod^{J}_{j=1} \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} \frac{\Gamma(\alpha+y_{j})\Gamma(\beta+n_{j}-y_{j})}{\Gamma(\alpha + \beta +n_{j})} \label{rat.marg.post.phi}
-\end{align}
+\end{aligned}
 \]</span></p></li>
 </ol>
 <p>And here is the code for this function:</p>
@@ -324,18 +324,30 @@ J = \begin{bmatrix}
      \end{bmatrix}       
 = - \alpha \beta  
 \]</span><br /> Hence, using the transformation method we have that <span class="math">\(p(log(\frac{\alpha}{\beta}), log(\alpha+\beta)) \propto \alpha \beta(\alpha + \beta)^{-5/2}\)</span>. And here is the code for this function:</p>
-<pre class="r"><code>data      = read.csv(&quot;C:/Users/fhocesde/Documents/tutorials/Bayesian/rats.csv&quot;, header=T, sep = &quot; &quot;)
-y         = data[,1]
-n         = data[,2]
+<pre class="r"><code>y         =  c(0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  
+               0,  0,  0,  1,  1,  1,  1,  1,  1,  1,  1,  
+               3,  2,  2,  2,  2,  2,  2,  2,  2,  2,  1,
+               5,  2,  5,  2,  7,  7,  3,  3,  2,  9, 10,  
+               4,  4,  4,  4,  4,  4,  4, 10,  4,  4,  4,
+               5, 11, 12,  5,  5,  6,  5,  6,  6,  6,  6,
+              16, 15, 15,  9,  4)
+n         = c(20, 20, 20, 20, 20, 20, 20, 19, 19, 19, 19,
+              18, 18, 17, 20, 20, 20, 20, 19, 19, 18, 18,
+              27, 25, 24, 23, 20, 20, 20, 20, 20, 20, 10,
+              49, 19, 46, 17, 49, 47, 20, 20, 13, 48, 50,
+              20, 20, 20, 20, 20, 20, 20, 48, 19, 19, 19,
+              22, 46, 49, 20, 20, 23, 19, 22, 20, 20, 20,
+              52, 46, 47, 24, 14)
+
 rat.hyper.prior   = function(alpha,beta) {
   alpha*beta*(alpha + beta)^(-5/2)
 }</code></pre>
 <p>4.2. Identify the relevant domain for the transformed variables and its counterpart with the original variables. To do so we start computing the parameters <span class="math">\(\alpha\)</span> and <span class="math">\(\beta\)</span> that would match the sample mean and standard deviation of all 70 experiments with a beta prior distribution:</p>
 <p><span class="math">\[
-\begin{align}
+\begin{aligned}
 \hat{\mu}     &amp;= 0.1381 = \frac{\hat{\alpha_{0}}}{\hat{\alpha_{0}}+\hat{\beta_{0}}}\\
 \hat{\sigma^2} &amp;= 0.0109   = \frac{\hat{\alpha_{0}}\hat{\beta_{0}}}{(\hat{\alpha_{0}}+\hat{\beta_{0}})^{2}(\hat{\alpha_{0}}+\hat{\beta_{0}}+1)}
-\end{align}
+\end{aligned}
 \]</span></p>
 <p>Solving for <span class="math">\((\hat{\alpha_{0}},\hat{\beta_{0}})\)</span>:</p>
 <pre class="r"><code>dslnex          &lt;- function(x) {
@@ -424,9 +436,9 @@ pool.var        &lt;- sum(se.effect^-2)^-1
 pool.ci         &lt;- c(-1.96,1.96)*pool.var^.5 + pool.est</code></pre>
 <p>The pooled estimated effect and variance are 7.69 and 16.58, with a 95% CI of [-0.3, 15.67].</p>
 <p><em>Posterior simulation under ther hierarchical model</em><br />Using the identity:<br /><span class="math">\[
-\begin{align}
+\begin{aligned}
 p(\theta,\mu,\tau|y) = p(\tau|y)p(\mu|\tau,y)p(\theta|\mu,\tau,y) 
-\end{align}
+\end{aligned}
 \]</span> And the results from BDA in equation 5.17, 5.20 and 5.21 we code the joint posterior:</p>
 <pre class="r"><code># Eqn 5.17 of BDA3
 post.theta.j    &lt;- function(mu,tau,j) (effect[j]/(se.effect[j]^2) + mu/(tau^2)) / (1/(se.effect[j]^2) + 1/(tau^2)) 
@@ -465,13 +477,13 @@ for (j in 1:length(school.id)) {
   }</code></pre>
 <p><strong>The following figures replicate the figures in pg 122 in BDA. Before doing the plots we need to ‘average over <span class="math">\(\mu\)</span>’</strong></p>
 <p><span class="math">\[
-\begin{align}
+\begin{aligned}
 E(\theta_{j}|\tau,y)   &amp;= E_{\mu}\left[E(\theta_{j}|\tau,y,\mu)|\tau,y\right] \nonumber \\
                        &amp;= E_{\mu}\left[\frac{ \frac{1}{\sigma_{j}^{2}}y_{j}  + \frac{1}{\tau^{2}}\mu }{\frac{1}{\sigma_{j}^{2}}  + \frac{1}{\tau^{2} } }|\tau,y\right] = \frac{ \frac{1}{\sigma_{j}^{2}}y_{j}  + \frac{1}{\tau^{2}}\hat{\mu} }{\frac{1}{\sigma_{j}^{2}}  + \frac{1}{\tau^{2} } }\\
 \nonumber \\                       
 Var(\theta_{j}|\tau,y) &amp;= E_{\mu}\left[Var(\theta_{j}|\tau,y,\mu)|\tau,y\right] + Var_{\mu}\left[E(\theta_{j}|\tau,y,\mu)|\tau,y\right] \nonumber \\
                       &amp;= \frac{1}{\frac{1}{\sigma_{j}^{2}}  + \frac{1}{\tau^{2} }} + V_{\mu}\left(\frac{\frac{1}{\tau^{2}}}{\frac{1}{\sigma_{j}^{2}}  + \frac{1}{\tau^{2} }}\right)
-\end{align}
+\end{aligned}
 \]</span></p>
 <p>Where <span class="math">\(V_{\mu}\)</span> and <span class="math">\(\hat{\mu}\)</span> correspond to the expressions defined in Eq 5.20 of BDA3. Below is the code and plot of both equations.</p>
 <pre class="r"><code>post.theta.j.no.mu     &lt;- function(tau,j) post.theta.j(post.mu.hat(tau),tau,j)  
@@ -624,9 +636,9 @@ theta.0         &lt;- c(-2.5, 2.5)</code></pre>
 } </code></pre>
 <ol start="2" style="list-style-type: lower-alpha">
 <li>Calculate the ratio of densities,<br /><span class="math">\[
-\begin{align}
+\begin{aligned}
 r               &amp;= \frac{p(\theta^{*}|y)}{p(\theta^{t-1}|y)}  \label{r.dens}
-\end{align}
+\end{aligned}
 \]</span></li>
 </ol>
 <pre class="r"><code>r.dens          &lt;- function(theta.t_1, theta.star) {
@@ -636,13 +648,13 @@ r               &amp;= \frac{p(\theta^{*}|y)}{p(\theta^{t-1}|y)}  \label{r.dens}
   } </code></pre>
 <ol start="3" style="list-style-type: lower-alpha">
 <li>Set <span class="math">\[
-\begin{align}
+\begin{aligned}
  \theta^{t} &amp;= \left\{ 
   \begin{array}{l l}
 \theta^{*} &amp; \quad \text{with probability $min(r,1)$}\\
 \theta^{t-1} &amp; \quad \text{otherwise.}
   \end{array} \right. \nonumber
-\end{align}
+\end{aligned}
 \]</span></li>
 </ol>
 <pre class="r"><code>theta.t         &lt;- function(theta.t_1, theta.star, r) {
@@ -726,10 +738,10 @@ J               &lt;- length(unique(id))
 n               &lt;- length(y)</code></pre>
 <p><em>The Model</em><br />Data <span class="math">\(y_{ij}, i= 1,..., n_{j} , j= 1,..,J\)</span> are iid within each of <span class="math">\(J\)</span> groups with <span class="math">\(y_{ij} \sim N(\theta_{j}, \sigma^{2})\)</span>. The prior distribution of <span class="math">\(\theta_{j}\)</span> is assume to be normal with hyperparameters <span class="math">\(\mu, \tau\)</span> (<span class="math">\(\theta_{j} \sim N(\mu, \tau^{2}\)</span>). <span class="math">\(\sigma\)</span> is assumed to be unkonwn (confusing!) and the hyperprior is assumed to be uniform over <span class="math">\((\mu, log(\sigma), \tau)\)</span>, which implies <span class="math">\(p(\mu, log(\sigma), log(\tau)) \propto \tau\)</span>. The joint posterior denstity for all the parameters is:</p>
 <p><span class="math">\[
-\begin{align}
+\begin{aligned}
 p(\theta,\mu, log(\sigma), log(\tau) | y) \propto \tau \prod^{J}_{j=1} N(\theta_{j}|\mu, \tau^{2}) \prod^{J}_{j=1} 
 \prod^{n_{j}}_{i=1} N(y_{ij}|\theta_{j}, \sigma^{2}) \label{norm.norm4gibs}
-\end{align}
+\end{aligned}
 \]</span></p>
 <p><em>Starting points</em><br />Select 10 <span class="math">\(\theta_{j}\)</span> randomly from the <span class="math">\(y_{ij}\)</span> sample. And take <span class="math">\(\mu\)</span> to be the average starting values of <span class="math">\(\theta_{j}\)</span>.</p>
 <pre class="r"><code>set.seed(142857)
@@ -737,9 +749,9 @@ theta.0         &lt;- sapply(1:4,function(x) sample(y[id==LETTERS[x]],10, replac
 mu.0            &lt;- apply(theta.0, 1,mean) </code></pre>
 <p>[Here I follow the exact reverse order that is proposed in the book, going from step 4 to 1 instead of 1 to 4. It is not clear to me how to do it otherwise].</p>
 <p><em>4. Draw from conditional posterior of <span class="math">\(\tau^{2}\)</span> </em> using: <span class="math">\[
-\begin{align}
+\begin{aligned}
 \hat{\tau}^{2} &amp;= \frac{1}{J-1}\sum_{j=1}^{J}(\theta_{j} - \mu)^{2}
-\end{align}
+\end{aligned}
 \]</span></p>
 <pre class="r"><code>tau.hat.2       &lt;- function(theta) {
   mu            &lt;- mean(theta)
@@ -747,9 +759,9 @@ mu.0            &lt;- apply(theta.0, 1,mean) </code></pre>
   return(tau.2)
 } </code></pre>
 <p>And the fact that: <span class="math">\[
-\begin{align}
+\begin{aligned}
 \tau^{2}|\theta,\mu,\sigma, y \sim Inv-\chi^2(J-1,\hat{\tau}^{2})
-\end{align}
+\end{aligned}
 \]</span></p>
 <p>We can draws samples for <span class="math">\(\tau^{2}\)</span></p>
 <pre class="r"><code>s.tau.post      &lt;- function(theta) {
@@ -758,9 +770,9 @@ mu.0            &lt;- apply(theta.0, 1,mean) </code></pre>
   return(tau.cond)
   }</code></pre>
 <p><em>3. Draw from conditional posterior of <span class="math">\(\sigma^{2}\)</span> </em> Using:<br /><span class="math">\[
-\begin{align}
+\begin{aligned}
 \hat{\sigma}^{2} &amp;= \frac{1}{n}\sum_{j=1}^{J}\sum_{i=1}^{n_{j}}(y_{ij} - \theta_{j})^{2}
-\end{align}
+\end{aligned}
 \]</span></p>
 <pre class="r"><code>f.sigma.hat.2   &lt;- function(theta) {
   sigma.hat.2   &lt;-  sapply(1:4, function(x) (y[id==LETTERS[x]] - theta[x])^2)  
@@ -769,9 +781,9 @@ mu.0            &lt;- apply(theta.0, 1,mean) </code></pre>
 }</code></pre>
 <p>And the fact that:</p>
 <p><span class="math">\[
-\begin{align}
+\begin{aligned}
 \sigma^{2}|\theta,\mu,\tau,y \sim  Inv-\chi^2(n,\hat{\sigma}^{2}) 
-\end{align}
+\end{aligned}
 \]</span> We can draws samples for <span class="math">\(\sigma^{2}\)</span></p>
 <pre class="r"><code>s.sigma.post      &lt;-  function(theta) {
   sigma2.hat      &lt;- f.sigma.hat.2(theta) 
@@ -779,18 +791,18 @@ mu.0            &lt;- apply(theta.0, 1,mean) </code></pre>
   return(sigma2.post)
   }</code></pre>
 <p><em>2. Draw from conditional posterior of <span class="math">\(\mu\)</span> </em> Using:<br /><span class="math">\[
-\begin{align}
+\begin{aligned}
 \hat{\mu} &amp;= \frac{1}{J} \sum_{j=1}^{J}\theta_{j}
-\end{align}
+\end{aligned}
 \]</span></p>
 <pre class="r"><code>mu.hat          &lt;- function(theta) {
   mean(theta)
 } </code></pre>
 <p>And the fact that:</p>
 <p><span class="math">\[
-\begin{align}
+\begin{aligned}
 \mu|\theta,\sigma,\tau,y \sim N(\hat{\mu}, \tau^{2}/J)
-\end{align}
+\end{aligned}
 \]</span></p>
 <p>We can draw values for <span class="math">\(\mu\)</span></p>
 <pre class="r"><code>s.mu        &lt;- function(theta,tau2) {
@@ -798,15 +810,15 @@ mu.0            &lt;- apply(theta.0, 1,mean) </code></pre>
   rnorm(1,mu.hat,sqrt(tau2/J))
 }</code></pre>
 <p><em>1. Finally, we can draw values for <span class="math">\(\theta\)</span></em> Using the fact that:<br /><span class="math">\[
-\begin{align}
+\begin{aligned}
 \theta_{j}|\mu,\sigma,\tau,y \sim N(\hat{\theta_{j}}, V_{\theta_{j}})
-\end{align}
+\end{aligned}
 \]</span><br />With: <span class="math">\[
-\begin{align}
+\begin{aligned}
 \hat{\theta_{j}} &amp;= \frac{ \frac{1}{\tau^{2}}\mu + \frac{n_{j}}{\sigma^{2}}\bar{y_{\dot j}}   }{\frac{1}{\tau^{2}} + \frac{n_{j}}{\sigma^{2}}} \nonumber \\
  \\
 V_{\theta_{j}} &amp;= \frac{1}{\frac{1}{\tau^{2}} + \frac{n_{j}}{\sigma^{2}}} \nonumber \\
-\end{align}
+\end{aligned}
 \]</span></p>
 <pre class="r"><code>theta.hat.j     &lt;- function(j,mu,sigma2,tau2) {
   y.bar.j       &lt;- mean(y[id==LETTERS[j]])
