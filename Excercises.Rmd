@@ -11,15 +11,13 @@ output:
 </script>
   
   
-Note: Some of the solutions presented here are have been reverse engineered from [here.][Gelman.sol]
-
-[Gelman.sol]: http://www.stat.columbia.edu/~gelman/book/solutions3.pdf
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(tidy = FALSE)
 library('boot')
 library('dplyr')
 library('nleqslv')
+library('mvtnorm')
 
 set.seed(142857)  
 n               <-  50
@@ -121,6 +119,9 @@ title(main = "A Dynamic Version of ''Let's Make a Deal'' \n  Percentage Gain in 
 Looking at the graph it seems that the advantages of thinking in a Bayesian fashion are certainly parameter-specific. Also notice that the player here chooses a "stubborn" strategy, I suspect that if she changes boxes in a optimal way the improvement in her chances will be slightly less. Maybe that is the reason why we don't think in a Bayesian fashion all the time. 
 
 ---  
+Note: Some of the solutions presented here are have been reverse engineered from [here.][Gelman.sol]
+
+[Gelman.sol]: http://www.stat.columbia.edu/~gelman/book/solutions3.pdf
 
  * 2.1
 $$
@@ -824,12 +825,306 @@ $$
 **Note:** I was note able to map perfectly this proof with this [other one](http://www.columbia.edu/~ks20/4703-Sigman/4703-07-Notes-ARM.pdf). that seems more complete. For the proof presented here, my main doubt regards the step between the second and third line.  
 
 
-* **11.2**       
-Replicate the computations for the bioassay example of section 3.7 using the Metropolis algorithm. Be sure to define your starting points and your jumping rule.   
+* **11.2 [CHECK WITH SUSAN]**       
+Replicate the computations for the bioassay example of section 3.7 using the Metropolis algorithm. Be sure to define your starting points and your jumping rule.
+
+From 3.7 we have that the posterior of $\alpha$ and $\beta$ follows:
+$$
+\begin{aligned}
+p(\alpha,\beta|y,n,x) \propto \prod_{i=1}^{k} p(y_{i}|\alpha,\beta,n_{i},x_{i}) \label{post.1}
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+p(y_{i}|\alpha,\beta,n_{i},x_{i}) \propto [logit^{-1}(\alpha +\beta x_{i})]^{y_i}[1-logit^{-1}(\alpha +\beta x_{i})]^{n_{i}- y_{i}}
+\end{aligned}
+$$
+
+
+Our starting values will be the ML estimates.
+
+```{r, echo=TRUE }
+# Data
+x               <-  c(-0.86, -0.30, -0.05,  0.73)
+y               <-  c(0, 1, 3, 5)
+n               <-  rep(5,4)
+
+# ML estimation
+mlfit <- glm( cbind(y, n-y) ~ x, family = binomial)
+mlfit$coefficients = round(mlfit$coefficients*1000)/1000
+res1 = paste(paste("(",mlfit$coefficients[1], sep=""), paste(mlfit$coefficients[2],")", sep=""), sep=",")
+```
+
+With the estimates $(\hat{\alpha_{0}},\hat{\beta_{0}}) = `r res1`$. 
+
+Now we will simulated values of $\alpha$ and $\beta$ using the Metropolis algorithm. Our jumping function will be a bivariate normal. We will start with a variance of $1\times I$ and tweak in in order to get an acceptance ratio between 20% and 50%.  
+
+**Note for Susan:** So far I have not been able to get convergence bellow. 
+``` {r, echo=TRUE, eval=FALSE}
+posterior       <-  function(arg1) {
+  alpha         <- arg1[1]
+  beta          <- arg1[2]
+  posterior     <-  1
+  for (i in 1:length(y)) {
+    posterior   <-  posterior * (   ( ( inv.logit( alpha + beta * x[i] ) )^y[i] ) *
+                                    ( ( 1 - inv.logit( alpha + beta * x[i] ) )^( n[i] - y[i] ) ) 
+                              )
+  }
+  posterior
+}
+
+#THERE HAS TO BE SOME ERROR IN THE CODE AS MY ALGORITH KEEP DIVERGING  
+  jumping         <- function(theta, scale=.1) rmvnorm(1, mean = theta, sigma = scale * diag(2))
+  d.jumping       <- function(theta, theta_1, scale=.1) dmvnorm(theta, theta_1, scale * diag(2))  
   
+  sims            <-  2000 
+  theta           <-  matrix(0,nrow = sims, ncol = 2) 
+  accept          <-  rep(0,sims) 
+  r.all           <-  rep(0,sims)            
+  theta[1,]       <-  mlfit$coefficients
+  
+  
+  for (i in 2:sims)
+  {  
+    theta.star      <-  jumping(theta[i-1,], .1)
+    #print(i)
+      r             <-  min( exp( 
+                            ( log( posterior(theta.star) ) ) - 
+                            ( log( posterior(theta[i-1,])) ) 
+                            ), 1) 
+  
+    r.all[i]        <-  r 
+    #print(r)
+    if ( r < runif(1) ) 
+    {
+      theta[i,]     <- theta.star 
+      accept[i]     <- 1
+    }
+    else 
+    {
+      theta[i,]     <- theta[i-1,]
+      accept[i]     <- 0
+    }
+    sum(accept)
+  }
+```  
+
   * **11.3**       
-  (To do)  
-  
+Given the following data:  
+
+```{r, echo=TRUE}  
+df              <-  data.frame(machine = rep(1:6, each=5), measure = c(83, 92, 92, 46, 67, 
+                                                                       117, 109, 114, 104, 87,
+                                                                       101, 93, 92, 86, 67,
+                                                                       105, 119, 116, 102, 116, 
+                                                                       79, 97, 103, 79, 92,
+                                                                       57, 92, 104, 77, 100))
+
+J               <- length(unique(df$machine))
+n               <- length(df$measure)
+
+```  
+
+Implement a separate, a pooled and a hierarchical Gaussian model with common variance described in section 11.6. Run the simulations long enough for appropiate convergence. Using each of three models -separate, pooled, and hierarchical- report: (i) the posterior distribution of the mean of the quality measurements of the sixth machine, (ii) the predictive distribution for another quality measurement of the sixth machine, and (iii) the posterior distribution of the meanof the quality measurements of the seventh machine. (**How to compute pooled and separate in a bayesian way?, what is the difference between (ii) and (iii)?**)
+
+*The Hierarchical Model*   
+Data $y_{ij}, i= 1,...,5 , j= 1,..,6$ are iid within each of $J$ groups with $y_{ij} \sim N(\theta_{j}, \sigma^{2})$. The prior distribution of $\theta_{j}$ is assume to be normal with hyperparameters $\mu, \tau$  ($\theta_{j} \sim N(\mu, \tau^{2})$), $\sigma$ is assumed to be unkonwn and the hyperprior is assumed to be uniform over $(\mu, log(\sigma), \tau)$, which implies  $p(\mu, log(\sigma), log(\tau)) \propto \tau$. The joint posterior denstity for all the parameters is:
+
+$$
+\begin{aligned}
+p(\theta,\mu, log(\sigma), log(\tau) | y) \propto \tau \prod^{J}_{j=1} N(\theta_{j}|\mu, \tau^{2}) \prod^{J}_{j=1} 
+\prod^{n_{j}}_{i=1} N(y_{ij}|\theta_{j}, \sigma^{2}) \label{norm.norm4gibs}
+\end{aligned}
+$$  
+
+
+*Starting points*  
+Select 10 $\theta_{j}$ randomly from the $y_{ij}$ sample. And take $\mu$ to be the average starting values of $\theta_{j}$. 
+
+```{r, echo=TRUE}
+set.seed(142857)
+theta.0         <- sapply(1:6,function(x) sample(df$measure[df$machine==x],10, replace=TRUE))
+mu.0            <- apply(theta.0, 1,mean) 
+```  
+
+*1. Draw from conditional posterior of $\tau^{2}$ *
+using:
+$$
+\begin{aligned}
+\hat{\tau}^{2} &= \frac{1}{J-1}\sum_{j=1}^{J}(\theta_{j} - \mu)^{2}
+\end{aligned}
+$$  
+```{r,echo=TRUE}
+tau.hat.2       <- function(theta) {
+  mu            <- mean(theta)
+  tau.2         <- ( 1/(J-1) ) * sum((theta - mu)^2)
+  return(tau.2)
+} 
+```
+And the fact that: 
+$$
+\begin{aligned}
+\tau^{2}|\theta,\mu,\sigma, y \sim Inv-\chi^2(J-1,\hat{\tau}^{2})
+\end{aligned}
+$$  
+
+We can draw samples for $\tau^{2}$  
+
+```{r, echo=TRUE}
+s.tau.post      <- function(theta) {
+  tau.2         <- tau.hat.2(theta) 
+  tau.cond      <- (J - 1) * (tau.2)/rchisq(1,J-1)
+  return(tau.cond)
+  }
+```  
+
+*2. Draw from conditional posterior of $\sigma^{2}$ *
+Using:  
+$$
+\begin{aligned}
+\hat{\sigma}^{2} &= \frac{1}{n}\sum_{j=1}^{J}\sum_{i=1}^{n_{j}}(y_{ij} - \theta_{j})^{2}
+\end{aligned}
+$$
+
+```{r,echo=TRUE}  
+f.sigma.hat.2   <- function(theta) {
+  sigma.hat.2   <-  sapply(1:6, function(x) (df$measure[df$machine==x] - theta[x])^2)  
+  sigma.hat.2   <-  (1/n) * sum(unlist(sigma.hat.2))
+  return(sigma.hat.2)
+}
+```   
+
+And the fact that: 
+
+$$
+\begin{aligned}
+\sigma^{2}|\theta,\mu,\tau,y \sim  Inv-\chi^2(n,\hat{\sigma}^{2}) 
+\end{aligned}
+$$
+We can draws samples for $\sigma^{2}$  
+
+```{r,echo=TRUE}
+s.sigma.post      <-  function(theta) {
+  sigma2.hat      <- f.sigma.hat.2(theta) 
+  sigma2.post      <-  (n) * (sigma2.hat)/rchisq(1,n)
+  return(sigma2.post)
+  }
+```  
+*3. Draw from conditional posterior of $\mu$ *
+Using:  
+$$
+\begin{aligned}
+\hat{\mu} &= \frac{1}{J} \sum_{j=1}^{J}\theta_{j}
+\end{aligned}
+$$
+
+```{r,echo=TRUE}
+mu.hat          <- function(theta) {
+  mean(theta)
+} 
+```
+And the fact that: 
+
+$$
+\begin{aligned}
+\mu|\theta,\sigma,\tau,y \sim N(\hat{\mu}, \tau^{2}/J)
+\end{aligned}
+$$
+
+We can draw values for $\mu$
+
+```{r,echo=TRUE}
+s.mu        <- function(theta,tau2) {
+  mu.hat    <- mu.hat(theta)
+  rnorm(1,mu.hat,sqrt(tau2/J))
+}
+```  
+
+*4. Finally, we can draw values for $\theta$*
+Using the fact that:   
+$$
+\begin{aligned}
+\theta_{j}|\mu,\sigma,\tau,y \sim N(\hat{\theta_{j}}, V_{\theta_{j}})
+\end{aligned}
+$$  
+With:
+$$
+\begin{aligned}
+\hat{\theta_{j}} &= \frac{ \frac{1}{\tau^{2}}\mu + \frac{n_{j}}{\sigma^{2}}\bar{y_{\dot j}}   }{\frac{1}{\tau^{2}} + \frac{n_{j}}{\sigma^{2}}} \nonumber \\
+ \\
+V_{\theta_{j}} &= \frac{1}{\frac{1}{\tau^{2}} + \frac{n_{j}}{\sigma^{2}}} \nonumber \\
+\end{aligned}
+$$  
+
+```{r,echo=TRUE}
+theta.hat.j     <- function(j,mu,sigma2,tau2) {
+  y.bar.j       <- mean(df$measure[df$machine==j])
+  n.j           <- length(df$measure[df$machine==j])
+  ( (1/tau2) * mu + (n.j/sigma2) * y.bar.j  ) / ( (1/tau2) + (n.j/sigma2)  )
+} 
+
+V.theta.hat.j   <- function(j,mu,sigma2,tau2) {
+  n.j           <- length(df$measure[df$machine==j])
+  ( 1 ) / ( (1/tau2) + (n.j/sigma2) )
+} 
+
+s.theta         <- function(mu,sigma2,tau2) {
+  theta         <- NULL 
+  for (j in 1:J) {
+    t.hat       <- theta.hat.j(j,mu,sigma2,tau2)   
+    v.t.hat     <- V.theta.hat.j(j,mu,sigma2,tau2)
+    theta[j]    <- rnorm(1,t.hat,sqrt(v.t.hat)) 
+  }
+  return(theta)
+}
+
+mcmc.gibbs      <- function(chain) {
+  res1          <- as.list(NULL) 
+  sims          <- 200
+  param         <- 9
+  s.param       <- matrix(NA, ncol = param, nrow = sims )
+  colnames(s.param)<-  c("theta1", "theta2", "theta3", "theta4", "theta5", "theta6", "mu", "sigma2", "tau2")
+  s.param[1,1:6]<- theta.0[chain,]
+  s.param[1,9]  <- s.tau.post(theta.0[chain,])
+  s.param[1,8]  <- s.sigma.post(theta.0[chain,])
+  s.param[1,7]  <- s.mu(theta.0[chain,],s.param[1,9])
+   
+  for (s in 2:sims) {
+    s.param[s,1:6]<- s.theta(s.param[s-1,7],s.param[s-1,8],s.param[s-1,9])
+    s.param[s,9]  <- s.tau.post(s.param[s,1:6])
+    s.param[s,8]  <- s.sigma.post(s.param[s,1:6])
+    s.param[s,7]  <- s.mu(s.param[s,1:6],s.param[s,9])
+  }
+return(s.param)
+#Warm-up
+}
+s.param           <- lapply(1:10, function(x) mcmc.gibbs(x))
+s.param.1         <- s.param[[1]][101:200, ] 
+
+#Transform the variance in to sd.
+s.param.1[,8:9]   <- sqrt(s.param.1[,8:9] )
+
+t(apply(s.param.1,2, function(x) quantile(x, c(.025,.25,.5,.75,.975))))
+
+r.hat             <- function(arg1) {
+  n               <- dim(arg1)[1]
+  m               <- dim(arg1)[2]
+  B               <- (n/(m-1)) * sum( ( apply(arg1,2,mean) - mean(arg1) )^2 )
+  W               <- (1/m) * (1/(n-1)) * sum( (arg1 - apply(arg1,2,mean))^2 )  
+  sqrt( (n-1)/(n) + B/(W*n) )
+}
+
+ #r.hat(sapply(1:10,function(x) s.param[[x]][,4] ))
+
+```
+
+
+
+
+
+
+
   
   * **11.6a**       
   (To do)    

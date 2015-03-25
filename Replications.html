@@ -63,7 +63,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 </script>
 <div id="replicating-example-from-pg-66-67" class="section level3">
 <h3>1 - Replicating example from pg 66-67</h3>
-<p>In Ch3 of BDA they present a first exercise of simulation (pg 66-67) where from a sample of 66 obs with mean 26.2 and standard deviation 10.8, they simulate the posterior for the mean assuming a joint normal likelihood and uninformative prior (where <span class="math">\(\sigma^{2}|y\sim Inv-\chi^{2}(n-1,s^{2})\)</span> and <span class="math">\(\mu|\sigma^{2},y \sim N(\bar{y},\sigma^{2}/n)\)</span>).</p>
+<p>Chapter 3 of BDA presents a first exercise of simulation (pgs 66-67) where from a sample of 66 obs with mean 26.2 and standard deviation 10.8, a posterior for the mean is simulated assuming a joint normal likelihood and uninformative prior (where <span class="math">\(\sigma^{2}|y\sim Inv-\chi^{2}(n-1,s^{2})\)</span> and <span class="math">\(\mu|\sigma^{2},y \sim N(\bar{y},\sigma^{2}/n)\)</span>).</p>
 <pre class="r"><code># Draw 1000 random numbers from a Inverse chi-squared
 f.sim.sigma   = function(draws) (n-1)*(se^2)/rchisq(draws,n-1)
 f.sim.norm    = function(draws) rnorm(draws,ybar,(f.sim.sigma(draws)/(n-1))^.5)

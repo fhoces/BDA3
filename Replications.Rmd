@@ -2,8 +2,8 @@
 title: 'Tutorial on Bayesian Statistics: Replicating Sections of BDA3'
 author: "Fernando Hoces de la Guardia"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
   word_document: default
 ---
 <script type="text/x-mathjax-config">
@@ -28,7 +28,7 @@ se      = 10.8
 ybar    = 26.2
 ```  
 
-In Ch3 of BDA they present a first exercise of simulation (pg 66-67) where from a sample of `r n` obs with mean `r ybar` and standard deviation `r se`, they simulate the posterior for the mean assuming a joint normal likelihood and uninformative prior (where $\sigma^{2}|y\sim Inv-\chi^{2}(n-1,s^{2})$ and $\mu|\sigma^{2},y \sim N(\bar{y},\sigma^{2}/n)$).
+Chapter 3 of BDA presents a first exercise of simulation (pgs 66-67) where from a sample of `r n` obs with mean `r ybar` and standard deviation `r se`, a posterior for the mean is simulated assuming a joint normal likelihood and uninformative prior (where $\sigma^{2}|y\sim Inv-\chi^{2}(n-1,s^{2})$ and $\mu|\sigma^{2},y \sim N(\bar{y},\sigma^{2}/n)$).
 
 ```{r,echo=TRUE}
 # Draw 1000 random numbers from a Inverse chi-squared
@@ -79,7 +79,7 @@ Using the fact that $p(\mu,\sigma^{2}|y) = p(\mu|\sigma^{2},y)p(\sigma^{2}|y)$ w
 $$
 \begin{aligned}
 \mu|\sigma^{2},y  &\sim N(\mu_{n},\sigma^{2}_{n}/\kappa_{n})  \label{post.mu}\\
-\sigma^{2}|y      &\sim  Inv-\chi^{2}(\nu_{n},\sigma^{2}_{n}) \\label{post.sig}\\
+\sigma^{2}|y      &\sim  Inv-\chi^{2}(\nu_{n},\sigma^{2}_{n}) \ label{post.sig}\\
 \end{aligned}
 $$
 The simulation algorithm is as follows:  
@@ -158,7 +158,9 @@ p(y_{i}|\alpha,\beta,n_{i},x_{i}) \propto [logit^{-1}(\alpha +\beta x_{i})]^{y_i
 \end{aligned}
 $$
 
-**Question for Susan: why is that in the likelihood above we do not multiply by the Jacobian of the transformation?**
+**Question:** Why don't we apply transformation method (multiply by the inverse of the Jacobian) to the likelyhood above?  
+**Answer:** Because we are not applying a transformation to $\theta$ we are only replacin theta by
+
 Using a non-informative prior ($p(\alpha,\beta)\propto 1$) we get that the conditional posterior has the form: 
 $$
 \begin{aligned}
@@ -764,7 +766,7 @@ n               <- length(y)
 ```
   
 *The Model*   
-Data $y_{ij}, i= 1,..., n_{j} , j= 1,..,J$ are iid within each of $J$ groups with $y_{ij} \sim N(\theta_{j}, \sigma^{2})$. The prior distribution of $\theta_{j}$ is assume to be normal with hyperparameters $\mu, \tau$  ($\theta_{j} \sim N(\mu, \tau^{2}$). $\sigma$ is assumed to be unkonwn (confusing!) and the hyperprior is assumed to be uniform over $(\mu, log(\sigma), \tau)$, which implies  $p(\mu, log(\sigma), log(\tau)) \propto \tau$. The joint posterior denstity for all the parameters is:
+Data $y_{ij}, i= 1,..., n_{j} , j= 1,..,J$ are iid within each of $J$ groups with $y_{ij} \sim N(\theta_{j}, \sigma^{2})$. The prior distribution of $\theta_{j}$ is assume to be normal with hyperparameters $\mu, \tau$  ($\theta_{j} \sim N(\mu, \tau^{2})$), $\sigma$ is assumed to be unkonwn and the hyperprior is assumed to be uniform over $(\mu, log(\sigma), \tau)$, which implies  $p(\mu, log(\sigma), log(\tau)) \propto \tau$. The joint posterior denstity for all the parameters is:
 
 $$
 \begin{aligned}
@@ -806,7 +808,7 @@ $$
 \end{aligned}
 $$  
 
-We can draws samples for $\tau^{2}$  
+We can draw samples for $\tau^{2}$  
 
 ```{r, echo=TRUE}
 s.tau.post      <- function(theta) {
@@ -936,7 +938,7 @@ mcmc.gibbs      <- function(chain) {
 return(s.param)
 #Warm-up
 }
-s.param           <- lapply(1:10,function(x) mcmc.gibbs(x))
+s.param           <- lapply(1:10, function(x) mcmc.gibbs(x))
 s.param.1         <- s.param[[1]][101:200, ] 
 
 #Transform the variance in to sd.
@@ -955,9 +957,6 @@ r.hat             <- function(arg1) {
  r.hat(sapply(1:10,function(x) s.param[[x]][,4] ))
 
 ```
-*Simulate 200 draws for each of the 10 chains*  
-**Note: ** Problems with $\sigma$ and $\tau$, need to review.   
-
 
 
 

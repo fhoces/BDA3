@@ -61,7 +61,6 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({ TeX: { equationNumbers: {autoNumber: "all"} } });
 </script>
-<p>Note: Some of the solutions presented here are have been reverse engineered from <a href="http://www.stat.columbia.edu/~gelman/book/solutions3.pdf">here.</a></p>
 <ul>
 <li><p>1.1</p></li>
 <li><p>1a: <span class="math">\[
@@ -147,6 +146,7 @@ Pr(B) &amp;= Pr(B|A)Pr(A) + Pr(B|\neg A)Pr(\neg A) = (1/2)*(1/3) + Pr(B|\neg A)*
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABUAAAAPACAMAAADDuCPrAAAAllBMVEX9/v0AAAAAADkAAGUAOTkAOWUAOY8AZmUAZo8AZrU5AAA5OQA5OTk5ZmU5j485j7U5j9plAABlAGVlOQBlZgBlZjllZmVltbVltdpltf2POQCPZgCPjzmPj7WPtY+P29qP2/21ZgC1jzm124+1/rW1/tq1/v3ajznatWXa24/a/tra/v39tWX924/9/rX9/tr9/v3/AACb6sG3AAAAMnRSTlP///////////////////////////////////////////////////////////////8A/7N2ihAAAAAJcEhZcwAAHYcAAB2HAY/l8WUAACAASURBVHic7d0Nm9s6epjhyCdxdiabls4macdtE7NNj7Y5tC3//z9X8Qt88UUJICgSwHNf1+4ZayRKoKhnSJGi/uYGAIjyN0c/AADIFQEFgEgEFAAiEVAAiERAASASAQWASAQUACIRUACIREABIBIBBYBIBBQAIhFQAIhEQAEgEgEFgEgEFAAiEVAAiERAASASAQWASAQUACIRUACIREABIBIBBYBIBBQAIhFQAIhEQAEgEgEFgEgEFAAiEVAAiERAASASAQWASAQUACIRUACIREABIBIBBYBIBBQAIhFQAIhEQAEgEgEFgEgEFAAiEVAAiERAASASAQWASAQ0rfYy+nD/urtoPv/x0gf348v9Pj99e3i9n1/7B/fb7+ZNNz3eZ+880tWe7+PMbsQP4Q+ia/RJPfT9fXpulytPD23tfq97LA1JFrZljjlmJwhoWmNn/EursUwblXrJo3smH1d/jPa/8xgqW3K+bw/ofbKNPqnnH8mbumj+o3pwQOMWNgK6joAmpZZZz4vFWqa966p7eDofYwXexCXtgwIkvPPYaV/Mx7w1oMOKeKNP6iEVUFUr9eAOD2jMwkZA1xHQlMZt35Xly7FMv7CgT+fD2oYfI/C2cpN0dx6hc872rQFtlwlGBFTdi32J7VUBDV/YCOg6AprS8Fr59A/+V0Mnw9Q9fF0dxtyGHyPwwpXlMFfnfDw2oOra81ugxwR068JGQNcR0JTG18Ff/UuqtkzPr61NK3b7MLfhr8Ya6cm4+6Oqv+Q/NqDP/wEZr/lnMffa6d/HBjR2YVvmmGN2goCmNG75NuP2buO6hrFMJ3hr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" title="plot of chunk unnamed-chunk-4" alt="plot of chunk unnamed-chunk-4" width="672" /></p>
 <p>Looking at the graph it seems that the advantages of thinking in a Bayesian fashion are certainly parameter-specific. Also notice that the player here chooses a “stubborn” strategy, I suspect that if she changes boxes in a optimal way the improvement in her chances will be slightly less. Maybe that is the reason why we don’t think in a Bayesian fashion all the time.</p>
 <hr />
+<p>Note: Some of the solutions presented here are have been reverse engineered from <a href="http://www.stat.columbia.edu/~gelman/book/solutions3.pdf">here.</a></p>
 <ul>
 <li>2.1 <span class="math">\[
 \begin{aligned}
@@ -1090,8 +1090,242 @@ Pr(\theta \leq \theta^{*} | \theta \text{ is accepted }) &amp;= Pr(\theta \leq \
 \]</span></p>
 <p><strong>Note:</strong> I was note able to map perfectly this proof with this <a href="http://www.columbia.edu/~ks20/4703-Sigman/4703-07-Notes-ARM.pdf">other one</a>. that seems more complete. For the proof presented here, my main doubt regards the step between the second and third line.</p>
 <ul>
-<li><p><strong>11.2</strong><br />Replicate the computations for the bioassay example of section 3.7 using the Metropolis algorithm. Be sure to define your starting points and your jumping rule.</p></li>
-<li><p><strong>11.3</strong><br /> (To do)</p></li>
+<li><strong>11.2 [CHECK WITH SUSAN]</strong><br />Replicate the computations for the bioassay example of section 3.7 using the Metropolis algorithm. Be sure to define your starting points and your jumping rule.</li>
+</ul>
+<p>From 3.7 we have that the posterior of <span class="math">\(\alpha\)</span> and <span class="math">\(\beta\)</span> follows: <span class="math">\[
+\begin{aligned}
+p(\alpha,\beta|y,n,x) \propto \prod_{i=1}^{k} p(y_{i}|\alpha,\beta,n_{i},x_{i}) \label{post.1}
+\end{aligned}
+\]</span></p>
+<p><span class="math">\[
+\begin{aligned}
+p(y_{i}|\alpha,\beta,n_{i},x_{i}) \propto [logit^{-1}(\alpha +\beta x_{i})]^{y_i}[1-logit^{-1}(\alpha +\beta x_{i})]^{n_{i}- y_{i}}
+\end{aligned}
+\]</span></p>
+<p>Our starting values will be the ML estimates.</p>
+<pre class="r"><code># Data
+x               &lt;-  c(-0.86, -0.30, -0.05,  0.73)
+y               &lt;-  c(0, 1, 3, 5)
+n               &lt;-  rep(5,4)
+
+# ML estimation
+mlfit &lt;- glm( cbind(y, n-y) ~ x, family = binomial)
+mlfit$coefficients = round(mlfit$coefficients*1000)/1000
+res1 = paste(paste(&quot;(&quot;,mlfit$coefficients[1], sep=&quot;&quot;), paste(mlfit$coefficients[2],&quot;)&quot;, sep=&quot;&quot;), sep=&quot;,&quot;)</code></pre>
+<p>With the estimates <span class="math">\((\hat{\alpha_{0}},\hat{\beta_{0}}) = (0.847,7.749)\)</span>.</p>
+<p>Now we will simulated values of <span class="math">\(\alpha\)</span> and <span class="math">\(\beta\)</span> using the Metropolis algorithm. Our jumping function will be a bivariate normal. We will start with a variance of <span class="math">\(1\times I\)</span> and tweak in in order to get an acceptance ratio between 20% and 50%.</p>
+<p><strong>Note for Susan:</strong> So far I have not been able to get convergence bellow.</p>
+<pre class="r"><code>posterior       &lt;-  function(arg1) {
+  alpha         &lt;- arg1[1]
+  beta          &lt;- arg1[2]
+  posterior     &lt;-  1
+  for (i in 1:length(y)) {
+    posterior   &lt;-  posterior * (   ( ( inv.logit( alpha + beta * x[i] ) )^y[i] ) *
+                                    ( ( 1 - inv.logit( alpha + beta * x[i] ) )^( n[i] - y[i] ) ) 
+                              )
+  }
+  posterior
+}
+
+#THERE HAS TO BE SOME ERROR IN THE CODE AS MY ALGORITH KEEP DIVERGING  
+  jumping         &lt;- function(theta, scale=.1) rmvnorm(1, mean = theta, sigma = scale * diag(2))
+  d.jumping       &lt;- function(theta, theta_1, scale=.1) dmvnorm(theta, theta_1, scale * diag(2))  
+  
+  sims            &lt;-  2000 
+  theta           &lt;-  matrix(0,nrow = sims, ncol = 2) 
+  accept          &lt;-  rep(0,sims) 
+  r.all           &lt;-  rep(0,sims)            
+  theta[1,]       &lt;-  mlfit$coefficients
+  
+  
+  for (i in 2:sims)
+  {  
+    theta.star      &lt;-  jumping(theta[i-1,], .1)
+    #print(i)
+      r             &lt;-  min( exp( 
+                            ( log( posterior(theta.star) ) ) - 
+                            ( log( posterior(theta[i-1,])) ) 
+                            ), 1) 
+  
+    r.all[i]        &lt;-  r 
+    #print(r)
+    if ( r &lt; runif(1) ) 
+    {
+      theta[i,]     &lt;- theta.star 
+      accept[i]     &lt;- 1
+    }
+    else 
+    {
+      theta[i,]     &lt;- theta[i-1,]
+      accept[i]     &lt;- 0
+    }
+    sum(accept)
+  }</code></pre>
+<ul>
+<li><strong>11.3</strong><br />Given the following data:</li>
+</ul>
+<pre class="r"><code>df              &lt;-  data.frame(machine = rep(1:6, each=5), measure = c(83, 92, 92, 46, 67, 
+                                                                       117, 109, 114, 104, 87,
+                                                                       101, 93, 92, 86, 67,
+                                                                       105, 119, 116, 102, 116, 
+                                                                       79, 97, 103, 79, 92,
+                                                                       57, 92, 104, 77, 100))
+
+J               &lt;- length(unique(df$machine))
+n               &lt;- length(df$measure)</code></pre>
+<p>Implement a separate, a pooled and a hierarchical Gaussian model with common variance described in section 11.6. Run the simulations long enough for appropiate convergence. Using each of three models -separate, pooled, and hierarchical- report: (i) the posterior distribution of the mean of the quality measurements of the sixth machine, (ii) the predictive distribution for another quality measurement of the sixth machine, and (iii) the posterior distribution of the meanof the quality measurements of the seventh machine.</p>
+<p><em>The Hierarchical Model</em><br />Data <span class="math">\(y_{ij}, i= 1,...,5 , j= 1,..,6\)</span> are iid within each of <span class="math">\(J\)</span> groups with <span class="math">\(y_{ij} \sim N(\theta_{j}, \sigma^{2})\)</span>. The prior distribution of <span class="math">\(\theta_{j}\)</span> is assume to be normal with hyperparameters <span class="math">\(\mu, \tau\)</span> (<span class="math">\(\theta_{j} \sim N(\mu, \tau^{2})\)</span>), <span class="math">\(\sigma\)</span> is assumed to be unkonwn and the hyperprior is assumed to be uniform over <span class="math">\((\mu, log(\sigma), \tau)\)</span>, which implies <span class="math">\(p(\mu, log(\sigma), log(\tau)) \propto \tau\)</span>. The joint posterior denstity for all the parameters is:</p>
+<p><span class="math">\[
+\begin{aligned}
+p(\theta,\mu, log(\sigma), log(\tau) | y) \propto \tau \prod^{J}_{j=1} N(\theta_{j}|\mu, \tau^{2}) \prod^{J}_{j=1} 
+\prod^{n_{j}}_{i=1} N(y_{ij}|\theta_{j}, \sigma^{2}) \label{norm.norm4gibs}
+\end{aligned}
+\]</span></p>
+<p><em>Starting points</em><br />Select 10 <span class="math">\(\theta_{j}\)</span> randomly from the <span class="math">\(y_{ij}\)</span> sample. And take <span class="math">\(\mu\)</span> to be the average starting values of <span class="math">\(\theta_{j}\)</span>.</p>
+<pre class="r"><code>set.seed(142857)
+theta.0         &lt;- sapply(1:6,function(x) sample(df$measure[df$machine==x],10, replace=TRUE))
+mu.0            &lt;- apply(theta.0, 1,mean) </code></pre>
+<p><em>1. Draw from conditional posterior of <span class="math">\(\tau^{2}\)</span> </em> using: <span class="math">\[
+\begin{aligned}
+\hat{\tau}^{2} &amp;= \frac{1}{J-1}\sum_{j=1}^{J}(\theta_{j} - \mu)^{2}
+\end{aligned}
+\]</span></p>
+<pre class="r"><code>tau.hat.2       &lt;- function(theta) {
+  mu            &lt;- mean(theta)
+  tau.2         &lt;- ( 1/(J-1) ) * sum((theta - mu)^2)
+  return(tau.2)
+} </code></pre>
+<p>And the fact that: <span class="math">\[
+\begin{aligned}
+\tau^{2}|\theta,\mu,\sigma, y \sim Inv-\chi^2(J-1,\hat{\tau}^{2})
+\end{aligned}
+\]</span></p>
+<p>We can draw samples for <span class="math">\(\tau^{2}\)</span></p>
+<pre class="r"><code>s.tau.post      &lt;- function(theta) {
+  tau.2         &lt;- tau.hat.2(theta) 
+  tau.cond      &lt;- (J - 1) * (tau.2)/rchisq(1,J-1)
+  return(tau.cond)
+  }</code></pre>
+<p><em>2. Draw from conditional posterior of <span class="math">\(\sigma^{2}\)</span> </em> Using:<br /><span class="math">\[
+\begin{aligned}
+\hat{\sigma}^{2} &amp;= \frac{1}{n}\sum_{j=1}^{J}\sum_{i=1}^{n_{j}}(y_{ij} - \theta_{j})^{2}
+\end{aligned}
+\]</span></p>
+<pre class="r"><code>f.sigma.hat.2   &lt;- function(theta) {
+  sigma.hat.2   &lt;-  sapply(1:6, function(x) (df$measure[df$machine==x] - theta[x])^2)  
+  sigma.hat.2   &lt;-  (1/n) * sum(unlist(sigma.hat.2))
+  return(sigma.hat.2)
+}</code></pre>
+<p>And the fact that:</p>
+<p><span class="math">\[
+\begin{aligned}
+\sigma^{2}|\theta,\mu,\tau,y \sim  Inv-\chi^2(n,\hat{\sigma}^{2}) 
+\end{aligned}
+\]</span> We can draws samples for <span class="math">\(\sigma^{2}\)</span></p>
+<pre class="r"><code>s.sigma.post      &lt;-  function(theta) {
+  sigma2.hat      &lt;- f.sigma.hat.2(theta) 
+  sigma2.post      &lt;-  (n) * (sigma2.hat)/rchisq(1,n)
+  return(sigma2.post)
+  }</code></pre>
+<p><em>3. Draw from conditional posterior of <span class="math">\(\mu\)</span> </em> Using:<br /><span class="math">\[
+\begin{aligned}
+\hat{\mu} &amp;= \frac{1}{J} \sum_{j=1}^{J}\theta_{j}
+\end{aligned}
+\]</span></p>
+<pre class="r"><code>mu.hat          &lt;- function(theta) {
+  mean(theta)
+} </code></pre>
+<p>And the fact that:</p>
+<p><span class="math">\[
+\begin{aligned}
+\mu|\theta,\sigma,\tau,y \sim N(\hat{\mu}, \tau^{2}/J)
+\end{aligned}
+\]</span></p>
+<p>We can draw values for <span class="math">\(\mu\)</span></p>
+<pre class="r"><code>s.mu        &lt;- function(theta,tau2) {
+  mu.hat    &lt;- mu.hat(theta)
+  rnorm(1,mu.hat,sqrt(tau2/J))
+}</code></pre>
+<p><em>4. Finally, we can draw values for <span class="math">\(\theta\)</span></em> Using the fact that:<br /><span class="math">\[
+\begin{aligned}
+\theta_{j}|\mu,\sigma,\tau,y \sim N(\hat{\theta_{j}}, V_{\theta_{j}})
+\end{aligned}
+\]</span><br />With: <span class="math">\[
+\begin{aligned}
+\hat{\theta_{j}} &amp;= \frac{ \frac{1}{\tau^{2}}\mu + \frac{n_{j}}{\sigma^{2}}\bar{y_{\dot j}}   }{\frac{1}{\tau^{2}} + \frac{n_{j}}{\sigma^{2}}} \nonumber \\
+ \\
+V_{\theta_{j}} &amp;= \frac{1}{\frac{1}{\tau^{2}} + \frac{n_{j}}{\sigma^{2}}} \nonumber \\
+\end{aligned}
+\]</span></p>
+<pre class="r"><code>theta.hat.j     &lt;- function(j,mu,sigma2,tau2) {
+  y.bar.j       &lt;- mean(df$measure[df$machine==j])
+  n.j           &lt;- length(df$measure[df$machine==j])
+  ( (1/tau2) * mu + (n.j/sigma2) * y.bar.j  ) / ( (1/tau2) + (n.j/sigma2)  )
+} 
+
+V.theta.hat.j   &lt;- function(j,mu,sigma2,tau2) {
+  n.j           &lt;- length(df$measure[df$machine==j])
+  ( 1 ) / ( (1/tau2) + (n.j/sigma2) )
+} 
+
+s.theta         &lt;- function(mu,sigma2,tau2) {
+  theta         &lt;- NULL 
+  for (j in 1:J) {
+    t.hat       &lt;- theta.hat.j(j,mu,sigma2,tau2)   
+    v.t.hat     &lt;- V.theta.hat.j(j,mu,sigma2,tau2)
+    theta[j]    &lt;- rnorm(1,t.hat,sqrt(v.t.hat)) 
+  }
+  return(theta)
+}
+
+mcmc.gibbs      &lt;- function(chain) {
+  res1          &lt;- as.list(NULL) 
+  sims          &lt;- 200
+  param         &lt;- 9
+  s.param       &lt;- matrix(NA, ncol = param, nrow = sims )
+  colnames(s.param)&lt;-  c(&quot;theta1&quot;, &quot;theta2&quot;, &quot;theta3&quot;, &quot;theta4&quot;, &quot;theta5&quot;, &quot;theta6&quot;, &quot;mu&quot;, &quot;sigma2&quot;, &quot;tau2&quot;)
+  s.param[1,1:6]&lt;- theta.0[chain,]
+  s.param[1,9]  &lt;- s.tau.post(theta.0[chain,])
+  s.param[1,8]  &lt;- s.sigma.post(theta.0[chain,])
+  s.param[1,7]  &lt;- s.mu(theta.0[chain,],s.param[1,9])
+   
+  for (s in 2:sims) {
+    s.param[s,1:6]&lt;- s.theta(s.param[s-1,7],s.param[s-1,8],s.param[s-1,9])
+    s.param[s,9]  &lt;- s.tau.post(s.param[s,1:6])
+    s.param[s,8]  &lt;- s.sigma.post(s.param[s,1:6])
+    s.param[s,7]  &lt;- s.mu(s.param[s,1:6],s.param[s,9])
+  }
+return(s.param)
+#Warm-up
+}
+s.param           &lt;- lapply(1:10, function(x) mcmc.gibbs(x))
+s.param.1         &lt;- s.param[[1]][101:200, ] 
+
+#Transform the variance in to sd.
+s.param.1[,8:9]   &lt;- sqrt(s.param.1[,8:9] )
+
+t(apply(s.param.1,2, function(x) quantile(x, c(.025,.25,.5,.75,.975))))</code></pre>
+<pre><code>##          2.5%     25%    50%    75%  97.5%
+## theta1 68.226  75.421  80.39  85.49  94.66
+## theta2 90.199  96.618 101.98 107.77 113.78
+## theta3 78.833  85.921  89.35  93.43  99.82
+## theta4 94.265 102.452 106.88 111.33 118.46
+## theta5 79.181  87.180  90.31  94.52  98.88
+## theta6 75.662  84.684  87.74  91.37  97.42
+## mu     83.439  88.912  92.94  96.81 105.40
+## sigma2 10.986  12.873  14.69  16.11  19.46
+## tau2    4.626   8.359  12.10  16.47  29.15</code></pre>
+<pre class="r"><code>r.hat             &lt;- function(arg1) {
+  n               &lt;- dim(arg1)[1]
+  m               &lt;- dim(arg1)[2]
+  B               &lt;- (n/(m-1)) * sum( ( apply(arg1,2,mean) - mean(arg1) )^2 )
+  W               &lt;- (1/m) * (1/(n-1)) * sum( (arg1 - apply(arg1,2,mean))^2 )  
+  sqrt( (n-1)/(n) + B/(W*n) )
+}
+
+ #r.hat(sapply(1:10,function(x) s.param[[x]][,4] ))</code></pre>
+<p><em>Simulate 200 draws for each of the 10 chains</em><br /><strong>Note: </strong> Problems with <span class="math">\(\sigma\)</span> and <span class="math">\(\tau\)</span>, need to review.</p>
+<ul>
 <li><p><strong>11.6a</strong><br /> (To do)</p></li>
 <li><p><strong>12</strong><br /> Install and run examples in STAN [DONE]</p></li>
 <li><p><strong>14</strong><br /> (To do)<br /> <em>Suggestion:</em> Run a logit regression using a frequentist (through ML) and Bayesian (through GS or MH) and compare the results.</p></li>
