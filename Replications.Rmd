@@ -18,11 +18,11 @@ library('dplyr')
 library('nleqslv')
 
 set.seed(142857)  
-````
+```
 
 ### 1 - Replicating example from pg 66-67  
 
-```{r,include=FALSE}
+```{r ,include=FALSE}
 n       = 66
 se      = 10.8
 ybar    = 26.2
@@ -325,11 +325,17 @@ $$
 And here is the code for this function:
 
 ```{r, echo=TRUE}
-
 rat.marg.post.phi =  function(alpha, beta) {
   post    = 1
   for (i in 1:length(y)) {
-    post  = post * ( ( ( gamma(alpha + beta) )/( gamma(alpha)*gamma(beta) ) ) * ( ( gamma(alpha + y[i] )*gamma(beta + n[i] - y[i]) )/( gamma(alpha + beta + n[i]) ) ) )
+    post  = post * ( 
+      (
+        ( gamma(alpha + beta) ) / ( gamma(alpha) * gamma(beta) ) 
+        ) * (
+        ( gamma( alpha + y[i] ) * gamma( beta + n[i] - y[i] ) ) /
+          (gamma(alpha + beta + n[i]) ) 
+        )
+      )
   }
   # The hyper prior is defined below
   rat.hyper.prior(alpha,beta) * post
@@ -397,14 +403,14 @@ res1            <- paste("(",round(sol1$x[1],1), ",", round(sol1$x[2],1), ")",se
 We get: $(\hat{\alpha_{0}},\hat{\beta_{0}}) = `r res1`$. 
 
 We center the grid (approximately) around that initial estimate and expand the grid to cover up to a factor of 4 of each parameter. The result is plotted in the following figure:  
-
+AQUI VOY
 ```{r, echo=TRUE}
 v1        = seq(log(sol1$x[1]/sol1$x[2])*2,log(sol1$x[1]/sol1$x[2])/2,length.out =151)
 v2        = seq(log(sol1$x[1]+sol1$x[2])/2,log(sol1$x[1]+sol1$x[2])*2,length.out =151)
 beta      = exp(v2)/(exp(v1)+1)
 alpha     = exp(v2+v1)/(exp(v1)+1)
 
-post.dens = outer(alpha,beta,function(x1,x2) log(rat.marg.post.phi(x1, x2)) )
+post.dens = outer(alpha,beta, function(x1,x2) log(rat.marg.post.phi(x1, x2)) )
 post.dens = exp(post.dens - max(post.dens))
 post.dens = post.dens/sum(post.dens)
 
@@ -459,12 +465,7 @@ plot(s.v1, s.v2, xlab=expression(log(alpha/beta)^s), ylab=expression(log(alpha+b
 
 4.5 By applying the inverse of the transformation we recover the marginal distribution of the original hyper-parameters. 
 
-```{r, echo=TRUE}
-s.beta      = exp(s.v2)/(exp(s.v1)+1)
-s.alpha     = exp(s.v2+s.v1)/(exp(s.v1)+1)
-```
-
-
+AQUI VOY
   5. For each draw of $\phi^{s}$, draw a sample of $\theta$ from $p(\theta|\phi^{s},y)$ 
 ```{r, echo=TRUE}
 s.beta      = exp(s.v2)/(exp(s.v1)+1)
