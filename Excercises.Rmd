@@ -1,9 +1,11 @@
 ---
-title: "Tutorial on Bayesian Statistics. Homework from BDA3"
-author: "Fernando Hoces de la Guardia"
+title: "Tutorial on Bayesian Statistics. <br> Homework from BDA3"
+author: 
+ - "Fernando Hoces de la Guardia"
+ - "Guided by: Susan Paddock"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
   word_document: default
 ---
 <script type="text/x-mathjax-config">
@@ -18,13 +20,20 @@ library('boot')
 library('dplyr')
 library('nleqslv')
 library('mvtnorm')
+knitr::opts_chunk$set(cache=TRUE)
 
 set.seed(142857)  
 n               <-  50
 ``` 
-* 1.1  
 
-  * 1a:
+
+[Gelman.sol]: http://www.stat.columbia.edu/~gelman/book/solutions3.pdf
+ 
+# Chapter 1
+
+## 1.1  
+
+### 1a:
 $$
 \begin{aligned}
 p(y)  &= \frac{1}{2} \left( p(y| \theta = 1) + p(y| \theta = 2) \right) \nonumber\\
@@ -40,7 +49,7 @@ type="l", xlab="y", ylab="", xaxs="i",
 yaxs="i", yaxt="n", bty="n", cex=2)
 ```
 
-  * 1b:
+### 1b:
 $$
 \begin{aligned}
 p(\theta = 1 | y = 1 ) &= \frac{p(\theta = 1)p(y = 1| \theta = 1)}{\sum_{i=1}^{2}p(\theta = i)p(y = 1| \theta = i)} \nonumber \\
@@ -58,7 +67,7 @@ p.theta.1       <- function(sigma) {
 Evaluating the last expression in the respective cumulative distribution function we get:`r p.theta.1(2)`. **Note: even though we are adding "discrete" number of probabilities, we are still in the continuous space (but for $y=1$) and should evaluate the probabilities in the density function.**
 
 
-  * 1c:
+### 1c:
 ```{r, include=FALSE }
 sigma           <- 2^(-2:3)
 ```
@@ -75,7 +84,7 @@ sigma           <- 2^(-2:3)
 | `r sigma[6]`         | `r p.theta.1(sigma[6])`  |  
 
 
- * 1.3   
+### 1.3  **[NEW]** 
  First: compute posterior of probability of having $Xx$ genes knowing that parents have brown eyes and individual has brown eyes: 
  
 $$
@@ -103,7 +112,7 @@ $$
 Now we want to compute the probability that the first grandchildren will have blue eyes. We know that all Judy's children have brown eyes, hence have genes $Xx$ or $XX$. It follows that the grandkids will have blue eyes only if the kids have $Xx$ genes. A kid will have $Xx$ if Judy has $Xx$ and she and her husband provide $Xx$ ($pr=2/3$, remember that the kid has brown eyes) or if she has $XX$ and her husband provide $Xx$ ($pr=1/2$). Hence the probability of any kid to be $Xx$ is:
 $$
 \begin{aligned}
-P(kid = Xx| \text{all info}) &= P(kid = Xx| \text{all info} + Judy = Xx)P(Judy = Xx) + P(kid = Xx| \text{all info} + Judy \neq Xx)P(Judy \neq Xx) \nonumber \\
+P(kid = Xx| \text{all info}) &= P(kid = Xx| \text{all info} + Judy = Xx)P(Judy = Xx) + \\  &P(kid = Xx| \text{all info} + Judy \neq Xx)P(Judy \neq Xx) \nonumber \\
 &= \left( \frac{2}{3} \right) \frac{ \frac{2p}{1+2p} (\frac{3}{4})^{n} }{ \frac{2p}{1+2p} (\frac{3}{4})^{n} + \frac{1}{1+2p} } + \left( \frac{1}{2} \right) \frac{ \frac{1}{1+2p} (\frac{3}{4})^{n} }{ \frac{2p}{1+2p} (\frac{3}{4})^{n} + \frac{1}{1+2p} }
 \end{aligned}
 $$ 
@@ -115,12 +124,13 @@ P(Grandchildren = Blue|\text{all info}) &=  \frac{ \frac{2}{3}\frac{2p}{1+2p} + 
 &= \frac{ \frac{2}{3}\frac{2p}{1+2p} + \frac{1}{2}\frac{1}{1+2p} }{\frac{2p}{1+2p} (\frac{3}{4})^{n} + \frac{1}{1+2p} } \left( \frac{1}{2}p \right) \nonumber
 \end{aligned}
 $$
-Note: Some of the solutions presented here are have been reverse engineered from [here.][Gelman.sol]. A few additional lines were added.   
+Note: This solution was reverse engineered from [here.][Gelman.sol]. A few additional lines were added.   
 
 
- * 1.6 The trick here is that the probability of having a fraternal twin birth with to boys is $1/4 \times 1/125$ and a identical twin birth of boys is $1/2 \times 1/300$. Hence the probability that Elvis had an identical twin is $5/11$. 
+## 1.6 **[NEW]**   
+The trick here is that the probability of having a fraternal twin birth with two boys is $1/4 \times 1/125$ and a identical twin birth of boys is $1/2 \times 1/300$. Hence the probability that Elvis had an identical twin is $5/11$. 
 
- * 1.7  *Let's Make a Deal*  
+## 1.7  *Let's Make a Deal*  
 Calculate the probability of winning for each box after one of the empty boxes has been revealed and is not a winning box. 
 
 Lets define the following events:  
@@ -156,19 +166,16 @@ wrong.updt  = function(n,i) 1/(n-i)
 bayes.gain      <- (bayes.updt(n,open.boxes)-wrong.updt(n,open.boxes)) / wrong.updt(n,open.boxes)  
 plot(open.boxes,bayes.gain, type="l", ylab="% Gain in prob of winning", col="red", xlab="boxes open", ylim=c(0,1.1), xlim=c(0,n))
 abline(v=49)
-title(main = "A Dynamic Version of ''Let's Make a Deal'' \n  Percentage Gain in probability of winning by thinking 'Bayesian'" )
+title(main = "A Dynamic Version of ''Let's Make a Deal'' \n  Percentage Gain in probability of winning by thinking 'Bayesian' " )
 ```
+  Looking at the graph it seems that the advantages of thinking in a Bayesian fashion are certainly parameter-specific. Also notice that the player here chooses a "stubborn" strategy, I suspect that if she changes boxes in a optimal way the improvement in her chances will be slightly less. Maybe that is the reason why we don't think in a Bayesian fashion all the time.
+ 
+ 
+ 
+# Chapter 2  
 
+## 2.1  
 
-
-Looking at the graph it seems that the advantages of thinking in a Bayesian fashion are certainly parameter-specific. Also notice that the player here chooses a "stubborn" strategy, I suspect that if she changes boxes in a optimal way the improvement in her chances will be slightly less. Maybe that is the reason why we don't think in a Bayesian fashion all the time. 
-
----  
-Note: Some of the solutions presented here are have been reverse engineered from [here.][Gelman.sol]
-
-[Gelman.sol]: http://www.stat.columbia.edu/~gelman/book/solutions3.pdf
-
- * 2.1
 $$
 \begin{aligned}
 P(\theta) &= Beta(4,4)  \\
@@ -197,13 +204,16 @@ dens = apply(sapply(0:2,function(x) choose(10,x)*dbeta(domain,4+x,4+10-x)),1,sum
 plot(domain, dens, type="l")
 ```  
 
-  * 2.14   
+## 2.14   
 
-  * 2.14a Deriving the posterior for a normal likelihood with known variance, unknown mean, and using a normal prior.  [Slide 15 here](http://www.people.fas.harvard.edu/~plam/teaching/methods/conjugacy/conjugacy_print.pdf)
+### 2.14a   
+ Deriving the posterior for a normal likelihood with known variance, unknown mean, and using a normal prior.  [Slide 15 here](http://www.people.fas.harvard.edu/~plam/teaching/methods/conjugacy/conjugacy_print.pdf)
   
 **Note:** a good reminder of the main conjugacy relationships can be found [here](http://www.johndcook.com/conjugate_prior_diagram.html)
 
-* 2.16a  Suppose $y \sim Bin(n,\theta)$, with $\theta \sim Beta(\alpha, \beta)$. Derive marginal distribution of $y$ (unconditional on $\theta$)
+### 2.16a **[NEW]** 
+
+Suppose $y \sim Bin(n,\theta)$, with $\theta \sim Beta(\alpha, \beta)$. Derive marginal distribution of $y$ (unconditional on $\theta$)
 
 $$
 \begin{aligned}
@@ -220,8 +230,10 @@ $$
 
 Where the second to last line follows from integrating the density of a $Beta(k + \alpha, n - k + \beta)$   
 
-- 2.19 Exponential model with conjugate prior distribution:  
-    - 2.19a Prove conyugacy for $y_{i}|\theta \sim Exp(\theta)$ for $i= 1, \dots ,n$ ,  iid, and $\theta \sim Gamma(\alpha, \beta)$: 
+## 2.19 **[NEW]** Exponential model with conjugate prior distribution:  
+
+### 2.19a 
+Prove conyugacy for $y_{i}|\theta \sim Exp(\theta)$ for $i= 1, \dots ,n$ ,  iid, and $\theta \sim Gamma(\alpha, \beta)$. 
 
 $$
 \begin{aligned}
@@ -233,8 +245,10 @@ p(\theta| \mathbf{y}) &\propto p(\mathbf{y}|\theta)p(\theta) \\
 &\propto \frac{(\beta + \sum y_{i})^{\alpha + n}}{\Gamma(\alpha + n)} \theta^{\alpha + n - 1} exp(-\theta(\beta + \sum y_{i}) ) \\
 &= Gamma(\alpha + n, \beta + \sum y_{i}) 
 \end{aligned} 
-$$
-    - 2.19b Show that the equivalent prior specification for the mean $\phi = 1/\theta$, is inverse-gamma.  
+$$  
+
+### 2.19b   
+Show that the equivalent prior specification for the mean $\phi = 1/\theta$, is inverse-gamma.  
     **Solution:** We will use the transformation method. For this purpose we define: $\phi = g(\theta) = 1/\theta$, This implies that $g^{-1}(\phi) = 1/\phi$ and $\frac{d}{d\phi} g^{-1}(\phi) = - 1/\phi^{2}$. Now:
     
 $$
@@ -246,7 +260,8 @@ f_{\phi}(\phi) &= f_{\theta}\left( g^{-1}(\phi) \right) |\frac{d}{d\phi}g^{-1}(\
 \end{aligned}
 $$    
    
-- 2.19c The length of life ($y_{i}$) of a ligth bulb is distributed $Exp(\theta)$, with $\theta \sim Gamma(\alpha, \beta)$ and Coefficient of Variation ($\sqrt{Var(\theta)} / E(\theta)$) equal to $0.5$. How many observation do we need to reduce the posterior CV to $0.1$? 
+### 2.19c  
+The length of life ($y_{i}$) of a ligth bulb is distributed $Exp(\theta)$, with $\theta \sim Gamma(\alpha, \beta)$ and Coefficient of Variation ($\sqrt{Var(\theta)} / E(\theta)$) equal to $0.5$. How many observation do we need to reduce the posterior CV to $0.1$? 
 
 $$
 \begin{aligned}
@@ -256,10 +271,14 @@ CV(\theta|y) &= \frac{\sqrt{4 + n}/( \beta + \sum y_{i} ) } { (4+n)/(\beta + \su
 \end{aligned}
 $$  
 
-- 2.19d How would your answer change if the CV refers to $\phi$ instead of $\theta$?  For this excercise we will use the fact that Inverse-Gamma distributions are conjugate with exponentials, where the resulting posterior has parameters $IG(\alpha +n, \beta + \sum y_{i})$. Following the same steps as in (c), but for the mean and variance of the IG, we get $\alpha = 6$. Solving for the CV of the posterior we get $n = 96$.   
+### 2.19d   
+How would your answer change if the CV refers to $\phi$ instead of $\theta$?  For this excercise we will use the fact that Inverse-Gamma distributions are conjugate with exponentials, where the resulting posterior has parameters $IG(\alpha +n, \beta + \sum y_{i})$. Following the same steps as in (c), but for the mean and variance of the IG, we get $\alpha = 6$. Solving for the CV of the posterior we get $n = 96$.   
 
+# Chapter 3
 
- * 3.7 Show that the likelihood of two indpendent poisson $v \sim Pois(\theta_{v}), b \sim Pois(\theta_{b})$ is the same as the likelihood of a $b|v+b \sim Bin(v+b, \frac{\theta_{b}}{\theta_{b} + \theta_{v}})$. 
+## 3.7 **[NEW]**  
+Show that the likelihood of two indpendent poisson $v \sim Pois(\theta_{v}), b \sim Pois(\theta_{b})$ is the same as the likelihood of a $b|v+b \sim Bin(v+b, \frac{\theta_{b}}{\theta_{b} + \theta_{v}})$. 
+
  **Solution:** For this proof I follow [Blitztein & Hwang - Ch4 - p166-167][Intro.Prob]: 
  
 - First, we get the distribution of $y = v + b$ (conditioning by $b$ and using the law of total probability): 
@@ -292,8 +311,9 @@ $$
 
 [Intro.Prob]: http://www.amazon.com/gp/product/1466575573/ref=pd_lpo_sbs_dp_ss_2?pf_rd_p=1944687522&pf_rd_s=lpo-top-stripe-1&pf_rd_t=201&pf_rd_i=188652940X&pf_rd_m=ATVPDKIKX0DER&pf_rd_r=0Y2GG9RTCM87QYXDVJQJ
  
- * 5.3 Reproducing results of section 5.5
+# Chapter 5  
 
+## 5.3 Reproducing results of section 5.5
 
 ```{r, echo=TRUE}
 #Data:
@@ -307,30 +327,43 @@ pool.ci         <- c(-1.96,1.96)*pool.var^.5 + pool.est
 ```
 
 
-The pooled estimated effect and variance are `r round(100*pool.est)/100` and `r round(100*pool.var)/100`, with a 95% CI of [`r round(100*pool.ci[1])/100`, `r round(100*pool.ci[2])/100`].   
-
-
-*Posterior simulation under ther hierarchical model*  
+The pooled estimated effect and variance are `r round(pool.est,2)` and `r round(pool.var,2)`, with a 95% CI of [`r round(pool.ci[1],2)`, `r round(pool.ci[2],2)`].   
+*Posterior simulation under the hierarchical model*  
 Using the identity:  
 $$
 \begin{aligned}
 p(\theta,\mu,\tau|y) = p(\tau|y)p(\mu|\tau,y)p(\theta|\mu,\tau,y) 
 \end{aligned}
 $$
-And the results from BDA in equation 5.17, 5.20 and 5.21 we code the joint posterior:
+And the results from BDA in equation 5.17, 5.20 and 5.21 we code the posteriors $p(\theta_{j} | \tau, \mu, y), p(\mu|\tau,y)$ and $p(\tau|y)$. **Important note:** for this excercise we could have follow *exactly* the same steps as the last excercise. Given some properties of the N-N model, we took a differente path and derive an analytic formula for $p(\mu|\tau,y)$ and $p(\tau|y)$ (instead of sampling from the join posterior density).
 
 ```{r, echo=TRUE}
 # Eqn 5.17 of BDA3
-post.theta.j    <- function(mu,tau,j) (effect[j]/(se.effect[j]^2) + mu/(tau^2)) / (1/(se.effect[j]^2) + 1/(tau^2)) 
-post.v.theta.j  <- function(tau,j) 1/(1/(se.effect[j]^2) + 1/(tau^2)) 
-# Eqn 5.20 of BDA3
-post.mu.hat     <- function(tau) sum(effect*1/(se.effect^2 +tau^2))/sum(1/(se.effect^2 +tau^2))
-post.v.mu       <- function(tau) (sum(1/(se.effect^2 +tau^2)))^-1
+post.theta.j    <- function(mu,tau,j) {
+  ( effect[j] / ( se.effect[j]^2 ) + mu / ( tau^2 ) ) /
+  ( 1 / ( se.effect[j]^2 ) + 1 / ( tau^2 ) ) 
+}
 
+post.v.theta.j  <- function(tau,j) {
+  1 / ( 1 / ( se.effect[j]^2 ) + 1 / ( tau^2 ) )
+}
+
+
+# Eqn 5.20 of BDA3
+post.mu.hat     <- function(tau) {
+  sum( effect * 1 / ( se.effect^2 +tau^2 ) ) / 
+  sum( 1 / ( se.effect^2 + tau^2 ) )
+}
+post.v.mu       <- function(tau) {
+  ( sum( 1 / ( se.effect^2 +tau^2 ) ) )^-1
+}
 # Eqn 5.21 of BDA3
 marginal.tau     <- function(tau) {
-  hyper.prior(tau)*(post.v.mu(tau)^.5)*prod(((se.effect^2 + tau^2)^(-.5)) * 
-                  exp(-((effect - post.mu.hat(tau))^2)/(2*(se.effect^2 + tau^2))))
+  hyper.prior(tau) * 
+    ( post.v.mu(tau)^.5 ) * 
+      prod( ( ( se.effect^2 + tau^2 )^(-.5) ) * 
+              exp( - ( ( effect - post.mu.hat( tau ) )^2 ) 
+                   / ( 2 * ( se.effect^2 + tau^2 ) ) ) )
 }
 ```  
 
@@ -344,7 +377,10 @@ tau.grid        <-  seq(0.001,30, length=samps)
 pdf.tau         <-  sapply(tau.grid,function(x) marginal.tau(x))
 pdf.tau         <-  pdf.tau/sum(pdf.tau)
 
-plot(tau.grid,pdf.tau, type="l", main="Figure 5.5 from BDA3", xlab=expression(tau), ylab="Density")
+plot(tau.grid,pdf.tau, type="l", 
+     main="Figure 5.5 from BDA3", 
+     xlab=expression(tau), 
+     ylab="Density")
 ```
 
 The sampling method in BDA3 suggest to apply the inverse method from the posterior of $\tau$. I don't do this for two reasons: (i) I'm not sure the posterior has a closed for solution for its inverse, and (ii) given that I already have the density, I can directly draw from that distribution sampling using the `sample` command (which leads me to think that this command applies the inverse method). 
@@ -381,40 +417,48 @@ Below is the code and plot of both equations.
 
 
 ```{r, echo=TRUE}  
-post.theta.j.no.mu     <- function(tau,j) post.theta.j(post.mu.hat(tau),tau,j)  
-post.se.theta.j.no.mu  <- function(tau,j) sqrt( (post.v.theta.j(tau,j)) * (1+post.v.mu(tau)*tau^(-2)) )
+post.theta.j.no.mu     <- function(tau,j) post.theta.j( post.mu.hat( tau ), tau, j )  
+post.se.theta.j.no.mu  <- function(tau,j) sqrt( 
+  ( post.v.theta.j( tau, j ) ) * ( 1 + post.v.mu( tau ) * tau^(-2) ) )
 
-plot( tau.grid,sapply(tau.grid, function(x) post.theta.j.no.mu(x,1)), type="l", ylim=c(-5,30), xlab="", ylab="")
-lines(tau.grid,sapply(tau.grid, function(x) post.theta.j.no.mu(x,2)))
-lines(tau.grid,sapply(tau.grid, function(x) post.theta.j.no.mu(x,3)))
-lines(tau.grid,sapply(tau.grid, function(x) post.theta.j.no.mu(x,4)))
-lines(tau.grid,sapply(tau.grid, function(x) post.theta.j.no.mu(x,5)))
-lines(tau.grid,sapply(tau.grid, function(x) post.theta.j.no.mu(x,6)))
-lines(tau.grid,sapply(tau.grid, function(x) post.theta.j.no.mu(x,7)))
-lines(tau.grid,sapply(tau.grid, function(x) post.theta.j.no.mu(x,8)))
-title(main="Figure 5.6 from BDA3", xlab=expression(tau), ylab="Estimated treatment effect")
+plot( tau.grid, sapply(tau.grid, function(x) post.theta.j.no.mu(x,1) ), 
+      type="l", ylim=c(-5,30), 
+      xlab="", ylab="")
+title(main="Figure 5.6 from BDA3", 
+      xlab=expression(tau), 
+      ylab="Estimated treatment effect")
 
+for (j in 2:8) { 
+  lines( tau.grid, 
+         sapply( tau.grid, function(x) post.theta.j.no.mu(x,j) ) )
+}
 
-plot(tau.grid,sapply(tau.grid, function(x)  post.se.theta.j.no.mu(x,1)), type="l", ylim=c(0,20), xlab="", ylab="")
-lines(tau.grid,sapply(tau.grid, function(x) post.se.theta.j.no.mu(x,2)))
-lines(tau.grid,sapply(tau.grid, function(x) post.se.theta.j.no.mu(x,3)))
-lines(tau.grid,sapply(tau.grid, function(x) post.se.theta.j.no.mu(x,4)))
-lines(tau.grid,sapply(tau.grid, function(x) post.se.theta.j.no.mu(x,5)))
-lines(tau.grid,sapply(tau.grid, function(x) post.se.theta.j.no.mu(x,6)))
-lines(tau.grid,sapply(tau.grid, function(x) post.se.theta.j.no.mu(x,7)))
-lines(tau.grid,sapply(tau.grid, function(x) post.se.theta.j.no.mu(x,8)))
-title(main="Figure 5.7 from BDA3", xlab=expression(tau), ylab="Posterior Standard Deviation")
+plot( tau.grid, sapply(tau.grid, function(x) post.se.theta.j.no.mu(x,1) ), 
+      type="l", ylim=c(0,20),
+      xlab="", ylab="")
+title(main="Figure 5.7 from BDA3", 
+      xlab=expression(tau), 
+      ylab="Posterior Standard Deviation")
+
+for (j in 2:8) { 
+  lines( tau.grid, 
+         sapply( tau.grid, function(x) post.se.theta.j.no.mu(x,j) ) )
+}
 ```
 
 
 ```{r,echo=TRUE}
 s.theta         <- matrix(unlist(s.theta), ncol = 8, byrow = FALSE)
 s.theta.sort    <- apply(s.theta, 2, sort)
-p               <- t( apply(s.theta.sort, 2, function(x) quantile(x,c(.025,.25,.5, .75, .975),type=1)) )
+p               <- t( apply( s.theta.sort, 2, function(x) 
+            quantile( x, c( .025, .25, .5, .75, .975), type=1 ) ) )
 p               <- round(p,3)
+#Bug in line below
+#knitr::kable(p, caption="Misclassification and Reliability for Different Thresholds")
 ```  
 
 **Table 5.3 from BDA3: **  
+Now we can use the simulated $\theta_s$ to described the estimated effects in each school. 
 
 | School                   |             |             |             |             |             |           
 |  -----------:            | :--------:  | :-------:   | :-------:   | :-----:     | :----:      |        
@@ -428,7 +472,7 @@ p               <- round(p,3)
 | `r school.id[7]`         | `r p[7,1]`  | `r p[7,2]`  | `r p[7,3]`  | `r p[7,4]`  | `r p[7,5]`  |      
 | `r school.id[8]`         | `r p[8,1]`  | `r p[8,2]`  | `r p[8,3]`  | `r p[8,4]`  | `r p[8,5]`  |      
 
-Here we reproduce figure 5.8 (with the same problems as above)
+Here we reproduce figure 5.8
 ```{r,echo=TRUE}  
 par(mfrow=c(1,2))  
 domain           <- c(-20,60)
@@ -437,10 +481,10 @@ hist(apply(s.theta,1,max), breaks=10, xlab="Largest Effect", main="", xlim=domai
 title(main="Figure 5.8 from BDA3")
 ```  
 
-This last figure ("largest effect") is a good example of one the main advantage of a fully Bayesian hierarchical model: once we have correctly simulated the posterior, we can test all kinds of complicated hypothesis.   
+This last figure ("largest effect") is a good example of one the main advantage of a fully Bayesian hierarchical model: once we have simulated the posterior, we can test all kinds of complicated hypothesis. 
 
-
-  * 5.3a (i) - For each school $j$, the probability that its coaching program is the best of eight:  
+### 5.3a  
+ - (i) For each school $j$, the probability that its coaching program is the best of eight:  
 (**Important:** do not sort each posterior). 
 ```{r, echo=TRUE}
 aux1            <- apply(s.theta,1,max)
@@ -460,7 +504,7 @@ best            <- apply(1*(s.theta==aux1), 2,mean)
 | `r school.id[7]`         | `r best[7]`  |  
 | `r school.id[8]`         | `r best[8]`  |  
 
-  * 5.3a (ii) - For each school $j$, the probability that its coaching program is better than other school $k$:  
+ - (ii) For each school $j$, the probability that its coaching program is better than other school $k$:  
 
 ```{r, echo=TRUE}
 p               <- sapply( 1:8,
@@ -470,6 +514,8 @@ p               <- sapply( 1:8,
                                              ) 
                           )
 ```  
+
+\pagebreak
 
 **Table 3: Probability that school $j$ (row) has a better program that school $k$ (column)**  
 
@@ -485,7 +531,8 @@ p               <- sapply( 1:8,
 | `r school.id[7]`     | `r p[7,1]`  | `r p[7,2]`  | `r p[7,3]`  | `r p[7,4]`  | `r p[7,5]`  | `r p[7,6]`  | `r p[7,7]`  | `r p[7,8]`  |      
 | `r school.id[8]`     | `r p[8,1]`  | `r p[8,2]`  | `r p[8,3]`  | `r p[8,4]`  | `r p[8,5]`  | `r p[8,6]`  | `r p[8,7]`  | `r p[8,8]`  |    
 
-  * 5.3b (i) - Now with $\tau = \infty$ compute for each school $j$, the probability that it has the best coaching program:  
+### 5.3b 
+ - (i) Now with $\tau = \infty$ compute for each school $j$, the probability that it has the best coaching program:  
   With $\tau = \infty$ each school posterior effect is independent $\theta_{j} \sim N(y_{y}, \sigma_{j}^{2})$. The probability of a school having the best coaching program is:  
   **Wrong way to do it:**  
 $$
@@ -531,7 +578,7 @@ best            <- best/sum(best)
 | `r school.id[7]`         | `r best[7]`  |  
 | `r school.id[8]`         | `r best[8]`  |  
 
-  * 5.3b (ii) - Now with $\tau = \infty$ compute for each school $j$, the probability that its coaching program is the better than other school $k$:  
+ - (ii) Now with $\tau = \infty$ compute for each school $j$, the probability that its coaching program is the better than other school $k$:  
 $$
 \begin{aligned}  
 p(\theta_{i}>\theta_{j}) &= p\left(-\frac{y_{j} - y_{i}}{\sqrt{\sigma_{i}^{2} + \sigma_{j}^{2}}} > \frac{(\theta_{j}-\theta_{i})- (y_{j} - y_{i})}{\sqrt{\sigma_{i}^{2} + \sigma_{j}^{2}}} \right) \\
@@ -565,21 +612,22 @@ p               <- p - .5 * diag(8)
 | `r school.id[8]`     | `r p[8,1]`  | `r p[8,2]`  | `r p[8,3]`  | `r p[8,4]`  | `r p[8,5]`  | `r p[8,6]`  | `r p[8,7]`  | `r p[8,8]`  |    
 
 
-  * 5.3c The estimated differences between the closed form solutions (5.3b) and the bayesian analysis (5.3a) is that the latter presents less extreme probability estimates (shrinkage)   
+### 5.3c    
+The estimated differences between the closed form solutions (5.3b) and the bayesian analysis (5.3a) is that the latter presents less extreme probability estimates (shrinkage)   
   
-  * 5.3d If $\tau = 0$, then all effects are the same so the probabilities can be 0 or 1 for all schools (all are the largest effect and the smallest at the same time)
+### 5.3d   
+If $\tau = 0$, then all effects are the same so the probabilities can be 0 or 1 for all schools (all are the largest effect and the smallest at the same time)
   
 
-
-
-  * **5.13 - Bicycles**
+##5.13 - Bicycles
 ```{r 5.13.data,echo=TRUE}
 #Load data
 y                <- c(16, 9  , 10 , 13 , 19 , 20 , 18 , 17 , 35 , 55 )
 n                <- c(74, 99 , 58 , 70 , 122, 77 , 104, 129, 308, 119)
 ```  
 
-  * 5.13a $y_{i}\sim Bin(\theta_{i},n_{i})$ where $n_{i}$ represents the *total* number of vehicles (bicycles + other vehicles). $\theta_{i}\sim Beta(\alpha,\beta)$ the prior distribution of biking rates for each street. We set a non-informative hyper-prior $p(\alpha,\beta) \propto (\alpha + \beta)^{-5/2}$. This implies that the **joint posterior** distribution has the following (same as in equation 5.6 in BDA3): 
+### 5.13a  
+$y_{i}\sim Bin(\theta_{i},n_{i})$ where $n_{i}$ represents the *total* number of vehicles (bicycles + other vehicles). $\theta_{i}\sim Beta(\alpha,\beta)$ the prior distribution of biking rates for each street. We set a non-informative hyper-prior $p(\alpha,\beta) \propto (\alpha + \beta)^{-5/2}$. This implies that the **joint posterior** distribution has the following (same as in equation 5.6 in BDA3): 
 
 $$
 \begin{aligned}
@@ -588,7 +636,8 @@ p(\theta,\alpha,\beta|y) &\propto p(\alpha, \beta)\prod^{J}_{j=1} \frac{\Gamma(\
 \end{aligned}
 $$
   
-  * 5.13b  Compute the marginal posterior of $\theta$, conditional on $\alpha, \beta$. For the beta-binomial case we have that given the hyper-parameters, each $\theta_{j}$ has a posterior distribution  $Beta(\alpha + y_{j}, \beta +n_{j} - y_{j})$. Assuming exchangeability:
+### 5.13b  
+Compute the marginal posterior of $\theta$, conditional on $\alpha, \beta$. For the beta-binomial case we have that given the hyper-parameters, each $\theta_{j}$ has a posterior distribution  $Beta(\alpha + y_{j}, \beta +n_{j} - y_{j})$. Assuming exchangeability:
 $$
 \begin{aligned}
 p(\theta|\alpha,\beta,y) &= \prod^{J}_{j=1} \frac{\Gamma(\alpha + \beta +n_{j})}{\Gamma(\alpha+y_{j})\Gamma(\beta+n_{j}-y_{j})} \theta_{j}^{\alpha+y_{j} - 1} (1 - \theta_{j})^{\beta+n_{j}-y_{j} - 1}\label{bic.cond.post.theta1}
@@ -653,8 +702,10 @@ bic.hyper.prior <-  function(alpha,beta)
     alpha*beta*(alpha + beta)^(-5/2)
 }
 
-v1              <-  seq(log(sol1$x[1]/sol1$x[2])*1.5,log(sol1$x[1]/sol1$x[2])/1.5,length.out =151)
-v2              <-  seq(log(sol1$x[1]+sol1$x[2])/1.5,log(sol1$x[1]+sol1$x[2])*1.5,length.out =151)
+v1              <-  seq(log(sol1$x[1]/sol1$x[2])*1.5,
+                        log(sol1$x[1]/sol1$x[2])/1.5,length.out =151)
+v2              <-  seq(log(sol1$x[1]+sol1$x[2])/1.5,
+                        log(sol1$x[1]+sol1$x[2])*1.5,length.out =151)
 beta            <-  exp(v2)/(exp(v1)+1)
 alpha           <-  exp(v2+v1)/(exp(v1)+1)
 
@@ -676,8 +727,10 @@ contour(v1, v2, post.dens,
 Adjust the grid and repeat:
 
 ```{r, echo=TRUE}
-v1              <-  seq(log(sol1$x[1]/sol1$x[2])*1.5,log(sol1$x[1]/sol1$x[2])/1.5,length.out =151)
-v2              <-  seq(log(sol1$x[1]+sol1$x[2])/3,log(sol1$x[1]+sol1$x[2])*1.5,length.out =151)
+v1              <-  seq(log(sol1$x[1]/sol1$x[2])*1.5,
+                        log(sol1$x[1]/sol1$x[2])/1.5,length.out =151)
+v2              <-  seq(log(sol1$x[1]+sol1$x[2])/3,
+                        log(sol1$x[1]+sol1$x[2])*1.5,length.out =151)
 beta            <-  exp(v2)/(exp(v1)+1)
 alpha           <-  exp(v2+v1)/(exp(v1)+1)
 
@@ -705,15 +758,16 @@ samps           <-  1000
 v1.dens         <-  apply(post.dens ,1, sum)
 s.v1            <-  sample(v1, samps, replace=TRUE, prob = v1.dens)
 
-#Select the colum of the joint density corresponding to a specific value of v1 (p(v2|v1))
+# Select the colum of the joint density corresponding to a specific value of v1 (p(v2|v1))
 cond.v2         <-  function(x) 
 {
   post.dens[which(v1 == s.v1[x]),]
 }
-#Sample a value of v2 according the the conditional probatility above
+# Sample a value of v2 according the the conditional probatility above
 s.v2            <-  sapply(1:samps,function(x) sample(v2,1,replace=TRUE,prob=cond.v2(x)))
 
-#Add a uniform random jitter centered at zero with with equal to the grid spacing. This will make the simulation draws more continuous. Plot the sampled values.  
+# Add a uniform random jitter centered at zero with with equal to the grid spacing. 
+# This will make the simulation draws more continuous. Plot the sampled values.  
 grid.v1         <-  v1[2] - v1[1]
 grid.v2         <-  v2[2] - v2[1]
 s.v2            <-  s.v2 + runif(length(s.v2),-grid.v2/2,grid.v2/2)
@@ -733,7 +787,8 @@ s.beta          <-  exp( s.v2 ) / ( exp(s.v1)+1 )
 s.alpha         <-  exp( s.v2 + s.v1 ) / ( exp(s.v1)+1 )  
 ```
 
-  * 5.13c For each draw of $\phi^{s}$, draw a sample of $\theta$ from $p(\theta|\phi^{s},y)$ 
+### 5.13c  
+For each draw of $\phi^{s}$, draw a sample of $\theta$ from $p(\theta|\phi^{s},y)$ 
 ```{r, echo=TRUE}
 theta.dist      <-  sapply(1:10, 
                            function(x) 
@@ -753,7 +808,8 @@ title(main="Posterior Distribution of Bike rates for all 10 streets")
 
   The estimated proportions are almost the same as the raw proportions (no shrinkage).  
   
-  * 5.13d  We generate 1000 draws from a $Beta(\alpha^{s},\beta^{s})$ where the parameters come from the draws obtained above:
+### 5.13d  
+We generate 1000 draws from a $Beta(\alpha^{s},\beta^{s})$ where the parameters come from the draws obtained above:
     
 ```{r,echo=TRUE}  
 s.theta         <- rbeta(1000, shape1 =s.alpha , shape2 = s.beta)   
@@ -763,13 +819,17 @@ CI.str          <- paste("(" , CI.num[1] , "," , CI.num[2] , ")")
 
 The posterior interval for $\hat{\theta} = `r CI.str`$   
 
-  * 5.13e If a new street is opening with 100 vehicles per day. The posterior interval predicts with 95% confidence that between `r CI.num[1]*100` and `r CI.num[2]*100`. This CI is not so informative as it covers almost all the possible observed bike rates. 
+### 5.13e  
+If a new street is opening with 100 vehicles per day. The posterior interval predicts with 95% confidence that between `r CI.num[1]*100` and `r CI.num[2]*100`. This CI is not so informative as it covers almost all the possible observed bike rates. 
   
-  * 5.13f The beta assumption might not have been so reasonable as the posterior estimates did not show much shrinkage. 
+### 5.13f  
+The beta assumption might not have been so reasonable as the posterior estimates did not show much shrinkage. 
   
   
-  * **5.14**  
-  * *5.14a* Set up a model in which the total number of vehicles observed at each location $j$ follows a Poisson distribution with parameter $\theta_{j}$, the 'true' rate of traffic per hour at the location. Assign a gamma population distribution for the parameters $\theta_{j}$ and a non-informative hyper-prior distribution. Write down the joint posterior distribution.   
+##5.14    
+
+### 5.14a  
+Set up a model in which the total number of vehicles observed at each location $j$ follows a Poisson distribution with parameter $\theta_{j}$, the 'true' rate of traffic per hour at the location. Assign a gamma population distribution for the parameters $\theta_{j}$ and a non-informative hyper-prior distribution. Write down the joint posterior distribution.   
   
   Now we have that $n_{j} \sim Poi(\lambda =\theta_{j})$ and $\theta_{j} \sim Gamma(\alpha)$. And the joint posterior is:  
 
@@ -782,7 +842,7 @@ p(\theta,\alpha,\beta|y) &\propto 1\times \prod_{j=1}^{10}Gamma(\theta_{j} | \al
 \end{aligned}
 $$
 
-* *5.14b*  
+### 5.14b  
 Then compute the marginal posterior of $\theta$, conditional on $\alpha, \beta$. For the gamma-poisson case we have that given the hyper-parameters, each $\theta_{j}$ has a posterior distribution  $Gamma(\alpha + n_{j}, \beta +1)$. Assuming exchangeability:  
 
 $$
@@ -840,7 +900,9 @@ bic.marg.post.phi <-   function(alpha, beta) {
     log.post        <-  log.post + log(gamma( alpha+n[i] )) - (alpha+n[i])*log((beta + 1))
   }
   # The hyper prior is defined below
-  log(bic.hyper.prior2(alpha,beta)) + log.post + (length(n)*alpha)*log(beta) - length(n)*log(gamma(alpha))
+  log(bic.hyper.prior2(alpha,beta)) + 
+    log.post + (length(n)*alpha)*log(beta) - 
+    length(n)*log(gamma(alpha))
 }
 
 bic.hyper.prior2 <-  function(alpha,beta) {
@@ -858,7 +920,13 @@ post.dens       <-  post.dens/sum(post.dens)
 
 
 contours        <- seq(min(post.dens), max(post.dens), length=10)
-contour(alpha, beta, post.dens,levels=contours, xlab=expression(alpha), ylab=expression(beta), xlim=c(min(alpha),max(alpha)) , ylim=c(min(beta),max(beta)), drawlabels=FALSE, main="Contour plot of joint posterior")
+contour(alpha, beta, post.dens,levels=contours, 
+        xlab=expression(alpha), 
+        ylab=expression(beta), 
+        xlim=c(min(alpha),max(alpha)) , 
+        ylim=c(min(beta),max(beta)), 
+        drawlabels=FALSE, 
+        main="Contour plot of joint posterior")
 ```  
 
 Adjust the grid and repeat:
@@ -872,7 +940,13 @@ post.dens       <-  exp(post.dens - max(post.dens))
 post.dens       <-  post.dens/sum(post.dens)
 
 contours        <- seq(min(post.dens), max(post.dens) , length=10)
-contour(alpha, beta, post.dens,levels=contours, xlab=expression(alpha), ylab=expression(beta), xlim=c(min(alpha),max(alpha)) , ylim=c(min(beta),max(beta)), drawlabels=FALSE, main="Contour plot of joint posterior")
+contour(alpha, beta, post.dens,levels=contours, 
+        xlab=expression(alpha), 
+        ylab=expression(beta), 
+        xlim=c(min(alpha),max(alpha)) , 
+        ylim=c(min(beta),max(beta)), 
+        drawlabels=FALSE, 
+        main="Contour plot of joint posterior")
 ```  
 
 Draw samples $(\alpha^{s}, \beta^{s})$ from $p(\alpha,\beta|y)$. 
@@ -882,44 +956,203 @@ samps           <-  1000
 alpha.dens      <-  apply(post.dens ,1, sum)
 s.alpha         <-  sample(alpha,samps, replace=TRUE, prob = alpha.dens)
 
-#Select the colum of the joint density corresponding to a specific value of v1 (p(beta|alpha))
+#Select the colum of the joint density corresponding to a specific 
+#value of v1 (p(beta|alpha))
 cond.beta       <-  function(x) {
   post.dens[which(alpha == s.alpha[x]),]
 }
 #Sample a value of v2 according the the conditional probatility above
-s.beta          <-  sapply(1:samps,function(x) sample(beta,1,replace=TRUE,prob=cond.beta(x)))
+s.beta          <-  sapply(1:samps,function(x) 
+  sample(beta,1,replace=TRUE,prob=cond.beta(x)))
 
-#Add a uniform random jitter centered at zero with with equal to the grid spacing. This will make the simulation draws more continuous. Plot the sampled values.  
+#Add a uniform random jitter centered at zero with with equal to the 
+#grid spacing. This will make the simulation draws more continuous. 
+#Plot the sampled values.  
 grid.alpha      <-  alpha[2]-alpha[1]
 grid.beta       <-  beta[2]-beta[1]
 s.beta          <-  s.beta + runif(length(s.beta),-grid.beta/2,grid.beta/2)
 s.alpha         <-  s.alpha + runif(length(s.alpha),-grid.alpha/2,grid.alpha/2)
-plot(s.alpha, s.beta, xlab=expression(alpha), ylab=expression(beta), xlim=c(min(alpha),max(alpha)) , ylim=c(min(beta),max(beta)), main="Scatter Plot of Sample Draws of alpha and beta")
+plot(s.alpha, s.beta, 
+     xlab=expression(alpha), 
+     ylab=expression(beta), 
+     xlim=c(min(alpha),max(alpha)) , 
+     ylim=c(min(beta),max(beta)), 
+     main="Scatter Plot of Sample Draws of alpha and beta")
 ```  
 
 **Note:** regardless of how much I change the range of $\alpha$ and $\beta$ I don't seem to cover the whole graph.     
 
-* *5.14c* Given the previous result we can say that the posterior is not integrable.     
+### 5.14c  
+Given the previous result we can say that the posterior is not integrable.     
   
-* *5.14d* I don't know how to alter it such that it becomes integrable.  
+### 5.14d   
+I don't know how to alter it such that it becomes integrable.  
 
-* **5.15**
-  * *5.15a*
+##5.15 **[NEW]**  Meta-analysis
+
+### 5.15a   
+Plot the posterior density of $\tau$.  
 ```{r, echo=TRUE}
+# We use the functions written for Excersice 5.3 
+
 df <- read.csv("C:/Users/fhocesde/Documents/tutorials/Bayesian/BDA3/meta.csv")
+y1 <- df$treated.deaths
+y0 <- df$control.deaths
+n1 <- df$treated.total
+n0 <- df$control.total  
+effect  <- log( y1/(n1- y1) ) - log( y0/(n0- y0) )  
+se.effect <- sqrt( 1/y1 + 1/(n1 - y1) + 1/y0 + 1/(n0 - y0) ) 
+
+# Eqn 5.17 of BDA3
+post.theta.j    <- function(mu,tau,j) {
+  ( effect[j] / ( se.effect[j]^2 ) + mu / ( tau^2 ) ) /
+  ( 1 / ( se.effect[j]^2 ) + 1 / ( tau^2 ) ) 
+}
+
+post.v.theta.j  <- function(tau,j) {
+  1 / ( 1 / ( se.effect[j]^2 ) + 1 / ( tau^2 ) )
+}
+
+# Eqn 5.20 of BDA3
+post.mu.hat     <- function(tau) {
+  sum( effect * 1 / ( se.effect^2 +tau^2 ) ) / 
+  sum( 1 / ( se.effect^2 + tau^2 ) )
+}
+post.v.mu       <- function(tau) {
+  ( sum( 1 / ( se.effect^2 +tau^2 ) ) )^-1
+}
+
+# Eqn 5.21 of BDA3
+marginal.tau     <- function(tau) {
+  hyper.prior(tau) * 
+    ( post.v.mu(tau)^.5 ) * 
+      prod( ( ( se.effect^2 + tau^2 )^(-.5) ) * 
+              exp( - ( ( effect - post.mu.hat( tau ) )^2 ) 
+                   / ( 2 * ( se.effect^2 + tau^2 ) ) ) )
+}
+```  
+
+Define a hyper-prior and draw 5000 samples from each distribution (for all 22 studies).
+
+```{r,echo=TRUE}
+samps           <- 5000 
+
+hyper.prior     <-  function(tau) 1
+tau.grid        <-  seq(0.001,1, length=samps)
+pdf.tau         <-  sapply(tau.grid,function(x) marginal.tau(x))
+pdf.tau         <-  pdf.tau/sum(pdf.tau)
+
+plot(tau.grid,pdf.tau, type="l", 
+     main="Density of Tau", 
+     xlab=expression(tau), 
+     ylab="Density")
 ```
 
-  * **10.1**       
-  * *10.1a*        
+
+### 5.15b  
+Produce figures analogus to 5.6 and 5.7 in BDA3 to show how the mean and variance of the posterior mean and stadart deviations of $\theta$ depend on $\tau$.   
+
+```{r,echo=TRUE}
+# Sampling
+s.tau           <- sample(tau.grid,samps,prob=pdf.tau, replace=TRUE)
+s.mu            <- sapply(s.tau,function(x) rnorm(1,post.mu.hat(x),(post.v.mu(x))^0.5))
+s.theta         <- NULL 
+for (j in 1:length(df$study)) {
+  s.theta[[j]]         <- sapply(1:samps, 
+                            function(x) 
+                            rnorm(1,
+                                  post.theta.j(s.mu[x],s.tau[x],j),
+                                  (post.v.theta.j(s.tau[x],j))^0.5
+                                  ) )
+  }
+```  
+
+
+```{r, echo=TRUE}  
+post.theta.j.no.mu     <- function(tau,j) post.theta.j( post.mu.hat( tau ), tau, j )  
+post.se.theta.j.no.mu  <- function(tau,j) sqrt( 
+  ( post.v.theta.j( tau, j ) ) * ( 1 + post.v.mu( tau ) * tau^(-2) ) )
+
+plot( tau.grid, sapply(tau.grid, function(x) post.theta.j.no.mu(x,1) ), 
+      type="l", ylim=c(-.7,.3), 
+      xlab="", ylab="")
+title(main="Analogous to Figure 5.6 from BDA3", 
+      xlab=expression(tau), 
+      ylab="Estimated treatment effect")
+
+for (j in 2:22) { 
+  lines( tau.grid, 
+         sapply( tau.grid, function(x) post.theta.j.no.mu(x,j) ) )
+}
+
+plot( tau.grid, sapply(tau.grid, function(x) post.se.theta.j.no.mu(x,1) ), 
+      type="l", ylim=c(0,.7),
+      xlab="", ylab="")
+title(main="Analogous to Figure 5.7 from BDA3", 
+      xlab=expression(tau), 
+      ylab="Posterior Standard Deviation")
+
+for (j in 2:22) { 
+  lines( tau.grid, 
+         sapply( tau.grid, function(x) post.se.theta.j.no.mu(x,j) ) )
+}
+```
+
+### 5.15c  
+Produce a scatterplot of the crude effects vs the posterior median. Show evidence of pooling
+```{r,echo=TRUE}
+s.theta         <- matrix(unlist(s.theta), ncol = 22, byrow = FALSE)
+s.theta.sort    <- apply(s.theta, 2, sort)
+theta.dist      <- t( apply( s.theta.sort, 2, function(x) 
+            quantile( x, c( .025, .25, .5, .75, .975), type=1 ) ) )
+theta.dist      <- round(theta.dist,3)
+#Bug in line below
+#knitr::kable(p, caption="Misclassification and Reliability for Different Thresholds")
+
+x11()
+plot(-800:500/1000,-800:500/1000, type = "l", lty=1, 
+     xlab="Observed rate",
+     ylab="95% CI and median of posterior")
+points(effect,theta.dist[,3])
+segments(effect,theta.dist[,1], effect,theta.dist[,5] )
+title(main="Posterior Distribution of Tumor Rates for all 22 Experiments 
+      \n Strong Evidence of Pooling")
+abline(h = mean(s.theta), lty = 2)
+legend("bottomright",legend=c("Observed = Posterior",
+                              "Overall Posterior Mean"),lty = c(1,2)) 
+```
+  
+### 5.15d  
+Draw simulations from the posterior of a new treatment effect. Plot a histogram of the simulations.   
+**Answer:** to study a new treatment effect we need to draw samples from $N(\widehat{\mu},\widehat{\tau})$, where :
+
+```{r new experimetnt, echo=TRUE}
+new.exp <- rnorm(5000, mean =s.mu, sd = s.tau)
+x11()
+hist(new.exp, xlab = expression(tilde(y)) , breaks = 20, 
+     main="Histogram of a new experiment")
+```  
+
+### 5.15d  
+Given the simulations just obtained, draw simulated outcomes from replications of a hypothetical new experiment with 100 persons in each of the treated and control groups. Plot a histogram of the crude estimated effect in the new experiment. 
+
+**Not Answered:** I don't know how to use the log odds to recover the treatment effect. If I knew then I would apply that function to each element just simulated, then I would compute the overall proportion of deaths under the control group and I would add the proportion under the treatment group. Finally I would use both proportions to get the total number of deaths in each group. 
+
+#Chapter 10 
+
+##10.1        
+### 10.1a   
   If $\theta \sim N(\mu, \sigma_{\theta})$ then $R$ draws $y^{(r)}$ will have a simulation standard error of $\hat{\sigma_{\theta}}/\sqrt{R}$. Hence in order to be within $0.1 \sigma_{\theta}$ we need $R=100$.  
-  * *10.1b*        
+  
+### 10.1b   
   For the simulation exercise we choose $\mu=0, \sigma_{\theta}=1$. We perform R draws and for each set of simulated numbers, we compute the 2.5% percentile $\{y^{r}\}_{p=0.025}$ and its difference with the theoretical percentile (-1.96), we repeat this exercise 100 times and look at the average of the difference for different values of $R$.  
 
 ```{r,echo=TRUE} 
 y_reps          <- apply( 
                     sapply( 1:100, 
                       function(x) sapply(10^(1:5), 
-                        function(x) abs(-1.96 - quantile(rnorm(x, mean=0, sd=1) , c(.025) ) ) )
+                        function(x) abs(-1.96 - 
+                                          quantile(rnorm(x, mean=0, sd=1) , c(.025) ) ) )
                           ), 1, mean
                         )
 ```  
@@ -937,7 +1170,7 @@ y_reps          <- apply(
 **Note:** both results don't match.  
 
 
-  * **10.4a**       
+### 10.4a  
 I follow [this proof][Gelman.sol]. 
 
 We want to prove that the conditional distribution of $\theta$
@@ -960,7 +1193,8 @@ $$
 **Note:** I was note able to map perfectly this proof with this [other one](http://www.columbia.edu/~ks20/4703-Sigman/4703-07-Notes-ARM.pdf). that seems more complete. For the proof presented here, my main doubt regards the step between the second and third line.  
 
 
-* **11.2 [CHECK WITH SUSAN]**       
+##11.2   
+**[CHECK WITH SUSAN]**       
 Replicate the computations for the bioassay example of section 3.7 using the Metropolis algorithm. Be sure to define your starting points and your jumping rule.
 
 From 3.7 we have that the posterior of $\alpha$ and $\beta$ follows:
@@ -976,7 +1210,6 @@ p(y_{i}|\alpha,\beta,n_{i},x_{i}) \propto [logit^{-1}(\alpha +\beta x_{i})]^{y_i
 \end{aligned}
 $$
 
-
 Our starting values will be the ML estimates.
 
 ```{r, echo=TRUE }
@@ -988,7 +1221,8 @@ n               <-  rep(5,4)
 # ML estimation
 mlfit <- glm( cbind(y, n-y) ~ x, family = binomial)
 mlfit$coefficients = round(mlfit$coefficients*1000)/1000
-res1 = paste(paste("(",mlfit$coefficients[1], sep=""), paste(mlfit$coefficients[2],")", sep=""), sep=",")
+res1 = paste(paste("(",mlfit$coefficients[1], sep=""), 
+             paste(mlfit$coefficients[2],")", sep=""), sep=",")
 ```
 
 With the estimates $(\hat{\alpha_{0}},\hat{\beta_{0}}) = `r res1`$. 
@@ -1002,16 +1236,22 @@ posterior       <-  function(arg1) {
   beta          <- arg1[2]
   posterior     <-  1
   for (i in 1:length(y)) {
-    posterior   <-  posterior * (   ( ( inv.logit( alpha + beta * x[i] ) )^y[i] ) *
-                                    ( ( 1 - inv.logit( alpha + beta * x[i] ) )^( n[i] - y[i] ) ) 
-                              )
+    posterior   <-  posterior * ( 
+      ( ( inv.logit( alpha + beta * x[i] ) )^y[i] ) *
+      ( ( 1 - inv.logit( alpha + beta * x[i] ) )^( n[i] - y[i] ) ) 
+      )
   }
   posterior
 }
 
 #THERE HAS TO BE SOME ERROR IN THE CODE AS MY ALGORITH KEEP DIVERGING  
-  jumping         <- function(theta, scale=.1) rmvnorm(1, mean = theta, sigma = scale * diag(2))
-  d.jumping       <- function(theta, theta_1, scale=.1) dmvnorm(theta, theta_1, scale * diag(2))  
+  jumping         <- function(theta, scale=.1) rmvnorm(1, 
+                                                       mean = theta, 
+                                                       sigma = scale * diag(2))
+  
+  d.jumping       <- function(theta, theta_1, scale=.1) dmvnorm(theta, 
+                                                                theta_1, 
+                                                                scale * diag(2))  
   
   sims            <-  2000 
   theta           <-  matrix(0,nrow = sims, ncol = 2) 
@@ -1045,16 +1285,17 @@ posterior       <-  function(arg1) {
   }
 ```  
 
-  * **11.3**       
+## 11.3         
 Given the following data:  
 
 ```{r, echo=TRUE}  
-df              <-  data.frame(machine = rep(1:6, each=5), measure = c(83, 92, 92, 46, 67, 
-                                                                       117, 109, 114, 104, 87,
-                                                                       101, 93, 92, 86, 67,
-                                                                       105, 119, 116, 102, 116, 
-                                                                       79, 97, 103, 79, 92,
-                                                                       57, 92, 104, 77, 100))
+df              <-  data.frame(machine = rep(1:6, each=5), 
+                               measure = c(83, 92, 92, 46, 67,
+                                           117, 109, 114, 104, 87,
+                                           101, 93, 92, 86, 67,
+                                           105, 119, 116, 102, 116,
+                                           79, 97, 103, 79, 92,
+                                           57, 92, 104, 77, 100))
 
 J               <- length(unique(df$machine))
 n               <- length(df$measure)
@@ -1079,7 +1320,8 @@ Select 10 $\theta_{j}$ randomly from the $y_{ij}$ sample. And take $\mu$ to be t
 
 ```{r, echo=TRUE}
 set.seed(142857)
-theta.0         <- sapply(1:6,function(x) sample(df$measure[df$machine==x],10, replace=TRUE))
+theta.0         <- sapply(1:6,function(x) sample(df$measure[df$machine==x],
+                                                 10, replace=TRUE))
 mu.0            <- apply(theta.0, 1,mean) 
 ```  
 
@@ -1219,7 +1461,9 @@ mcmc.gibbs      <- function(chain) {
   res1          <- as.list(NULL) 
   param         <- 9
   s.param       <- matrix(NA, ncol = param, nrow = sims )
-  colnames(s.param)<-  c("theta1", "theta2", "theta3", "theta4", "theta5", "theta6", "mu", "sigma2", "tau2")
+  colnames(s.param)<-  c("theta1", "theta2", "theta3", 
+                         "theta4", "theta5", "theta6", 
+                         "mu", "sigma2", "tau2")
   s.param[1,1:6]<- theta.0[chain,]
   s.param[1,9]  <- s.tau.post(theta.0[chain,])
   s.param[1,8]  <- s.sigma.post(theta.0[chain,])
@@ -1265,10 +1509,13 @@ $$
 
 ```{r, echo=TRUE}  
 y.bar.dot.dot   <-  mean(df$measure)
-var.pooled      <-  sum( (df$measure[df$machine==6] - mean(df$measure))^2 )/( length(df$measure) - 1)
+var.pooled      <-  sum( (df$measure[df$machine==6] - 
+                            mean(df$measure))^2 )/( length(df$measure) - 1)
 s.theta.pooled.6<- rnorm(sims, y.bar.dot.dot, sqrt(var.pooled))
 y.bar.6.dot     <-  mean(df$measure[df$machine==6]) 
-var.sep.6       <-  sum( (df$measure[df$machine==6] - mean(df$measure[df$machine==6]))^2 )/( length(df$measure[df$machine==6]) - 1)
+var.sep.6       <-  sum( (df$measure[df$machine==6] - 
+                            mean(df$measure[df$machine==6]))^2 ) / 
+                        ( length(df$measure[df$machine==6]) - 1)
 s.theta.sep.6   <- rnorm(sims, y.bar.6.dot, sqrt(var.sep.6))
 ```  
 
@@ -1277,18 +1524,19 @@ Now we can answer the original questions:
 For the hierarchical, pooled and separate models: draw from $N(\theta_{6}, \sigma^{2}), N(\bar{y_{\cdot \cdot}}, V^{pooled}_{6}), N(\bar{y_{6 \cdot}} , V^{sep}_{6})$. The results are summarize in the following plot:
 
 ```{r, echo=TRUE}
-plot(density(s.param.1[,"theta6"]), col="red", xlab="Mean Measure", 
-    ylab="Density", main="Distribution of Mean 7th Measure under Three Models")
+plot(density(s.param.1[,"theta6"]), col="red", 
+     xlab="Mean Measure", 
+     ylab="Density", 
+     main="Distribution of Mean 7th Measure under Three Models")
 lines(density(s.theta.pooled.6), col="blue")
 lines(density(s.theta.sep.6), col="green")
-legend("topleft",col = c("red","blue", "green") ,legend=c("Hierarchical","pooled", "separated"),lty = c(1,1,1)) 
+legend("topleft",col = c("red","blue", "green"),
+       legend=c("Hierarchical","pooled", "separated"),
+       lty = c(1,1,1)) 
 ```
 
 - (ii) The predictive distribution for another quality measurement of the sixth machine.    
-
-
 **I was not able to think of a way to sample for this part, I would appreciate suggestions **  
-
 
 - (iii) The posterior distribution of the mean of the quality measurements of the seventh machine.  
 For the hierarchical, pooled and separate models: draw from $N(\mu, \tau), N(\bar{y_{\cdot \cdot}}, V^{pooled}_{6}), N(\bar{y_{6 \cdot}} , V^{sep}_{6})$. The results are summarize in the following plot:
@@ -1298,11 +1546,13 @@ plot(density(s.param.1[,"mu"]), col="red", xlab="Mean Measure",
     ylab="Density", main="Distribution of a 7th Measure under Three Models")
 lines(density(s.theta.pooled.6), col="blue")
 lines(density(s.theta.sep.6), col="green")
-legend("topleft",col = c("red","blue", "green") ,legend=c("Hierarchical","pooled", "separated"),lty = c(1,1,1)) 
+legend("topleft",col = c("red","blue", "green"), 
+       legend=c("Hierarchical","pooled", "separated"), 
+       lty = c(1,1,1)) 
 ```
 
   
-  * **11.6a**       
+### 11.6a  
 For any given scalar estimand $\phi$, the simulation methods studied in chapter 11 generate *chains* of random numbers. It is common practice to delete (warm-up) the first half of each chain. The resulting half is usually split in to two new halfs. Denote $n$ the length of each resulting chain, and $m$ the number of such chains. 
 Show that:  
 $$ 
@@ -1329,24 +1579,28 @@ $$
 
 I was not able to show that the term inside the parenthesis was equal to $\sum_{t=1}^{\infty} \rho_{t}$. 
 
-  * **12**       
+# Chapter 12         
   Install and run examples in STAN [DONE] 
   
-  
-  * **14.1**     
+# Chapter 14  
+## 14.1     
   
 ```{r, echo=TRUE, eval=TRUE}
 # Analysis of Radon measures
-y.1             <-  c(5.0, 13.0, 7.2, 6.8, 12.8, 5.8, 9.5, 6.0, 3.8, 14.3, 1.8, 6.9, 4.7, 9.5)
-y.2             <-  c(0.9, 12.9, 2.6, 3.5, 26.6, 1.5, 13.0, 8.8, 19.5, 2.5, 9.0, 13.1, 3.6, 6.9)
-y.3             <-  c(14.3, 6.9, 7.6, 9.8, 2.6, 43.5, 4.9, 3.5, 4.8, 5.6, 3.5, 3.9, 6.7)
+y.1             <-  c(5.0, 13.0, 7.2, 6.8, 12.8, 5.8, 9.5, 
+                      6.0, 3.8, 14.3, 1.8, 6.9, 4.7, 9.5)
+y.2             <-  c(0.9, 12.9, 2.6, 3.5, 26.6, 1.5, 13.0, 
+                      8.8, 19.5, 2.5, 9.0, 13.1, 3.6, 6.9)
+y.3             <-  c(14.3, 6.9, 7.6, 9.8, 2.6, 43.5, 4.9, 
+                      3.5, 4.8, 5.6, 3.5, 3.9, 6.7)
 basement.1      <-  c(1,1,1,1,1,0,1,1,1,0,1,1,1,1)
 basement.2      <-  c(0,1,1,0,1,1,1,1,1,0,1,1,1,0)
 basement.3      <-  c(1,0,1,0,1,1,1,1,1,1,1,1,1)
 counties        <-  rep(1:3,c(length(y.1),length(y.2),length(y.3)))
 y               <-  c(y.1,y.2,y.3)
 indicators      <-  as.matrix(table(1:length(counties), counties))
-x               <-  cbind(basement=c(basement.1,basement.2,basement.3), indicators)
+x               <-  cbind(basement=c(basement.1,basement.2,basement.3), 
+                          indicators)
 colnames(x)     <-  c("basement","countie1", "countie2", "countie3")
 lf.1            <-  summary( lm(log(y)~x-1) ) 
 
@@ -1355,12 +1609,14 @@ n <- nrow(x)
 k <- ncol(x)
 
 s.sigma           <- lf.1$sigma*sqrt((n-k)/rchisq(nsim,n-k))
-s.beta            <- matrix(rep(lf.1$coefficients[,1], 2), ncol=4, nrow=nsim, byrow = TRUE) + 
-  matrix(rnorm( nsim * k), nrow = nsim, ncol = k ) %*% chol( vcov(lf.1) ) * s.sigma/lf.1$sigma  
+s.beta            <- matrix(rep(lf.1$coefficients[,1], 2), 
+                            ncol=4, nrow=nsim, byrow = TRUE) + 
+                     matrix(rnorm( nsim * k), 
+                            nrow = nsim, ncol = k ) %*% 
+                     chol( vcov(lf.1) ) * s.sigma/lf.1$sigma  
 ```  
 
-
-  * **14a**  
+### 14a    
 Fit a linear regression to the logarithms of the radon measurements (`y`), with indicator variables for the three counties and for whether a measurement was recorded on the first floor. Summarize your posterior inference in nontechnical terms.   
 
 
@@ -1371,7 +1627,8 @@ For example in the bayesian setup we could ask: does the mean for Blue Earth Cou
 ```{r, echo=TRUE}  
 s.beta.2.bins   <-  cut(s.beta[ ,2], quantile(s.beta[,2], probs=1:10/10))
 boxplot(s.beta[,3]~s.beta.2.bins, xlab="deciles of beta_2", ylab="beta 3", 
-         main="Distribution of the mean for B. Earth County with basement, relative to without basement")  
+         main="Distribution of the mean for B.\n 
+        Earth County with basement, relative to without basement")  
 
 #output <- exp (cbind (beta[,2], beta[,1]+beta[,2], beta[,3],
 #beta[,1] + beta[,3], beta[,4], beta[,1] + beta[,4], beta[,1], sigma))
@@ -1380,13 +1637,13 @@ boxplot(s.beta[,3]~s.beta.2.bins, xlab="deciles of beta_2", ylab="beta 3",
 
 As we can see, this two effects co-variate positively.  
   
-  * **14b**  
+### 14b  
 Suppose another house is sampled at random from Blue Earth County (`counties=1`). Sketch the posterior predictive distribution for its radon measurement and give a 95% predictive interval. Express the interval on the original (unlogged) scale.   
 
 
 A proposed answer is [here][Gelman.sol] but I did not write it down as I don't fully understand it yet (and run out of time). 
 
-  * **15**       
+### 15        
 Run a full HLM example and compare with a fixed effect regression. 
 
 A proposed answer is [here][link2] but I did not write it down as I don't fully understand it yet  (and run out of time). 
